@@ -258,6 +258,13 @@ function generaSequenzaTurni(indiceInizialeForzato){
     TurniPSStorage.setItem(CHIAVE_SEQUENZA_ULTIMO_GIORNO, dataISO(ultimoGiornoScritto));
     salvaTurniStorage();
     salvaSequenzaStorage();
+
+    // Porta il calendario direttamente sul periodo appena generato.
+    // Prima della correzione, se l'utente generava una sequenza in un mese diverso
+    // da quello visualizzato, il calendario restava sul mese precedente e sembrava vuoto.
+    annoCorrente = dataInizio.getFullYear();
+    meseCorrente = dataInizio.getMonth();
+    giornoSelezionato = dataInizioStr;
     mostraScheda('turni');
     renderCalendario();
   };
