@@ -1,0 +1,671 @@
+/* FASE 1 — modulo estratto dal precedente script.js. */
+
+function calcolaAliquotaAddizionaleRegionale(regione, redditoAnnuo){
+  const dati = REGIONI_ADDIZIONALE_2026[regione];
+  if(!dati) return 0;
+  if(dati.tipo === 'unica') return dati.valore;
+  for(const scaglione of dati.scaglioni){
+    if(redditoAnnuo <= scaglione.fino) return scaglione.aliquota;
+  }
+  return dati.scaglioni[dati.scaglioni.length - 1].aliquota;
+}
+
+function calcolaPasqua(anno){
+  const a = anno % 19, b = Math.floor(anno / 100), c = anno % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mese = Math.floor((h + l - 7 * m + 114) / 31);
+  const giorno = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(anno, mese - 1, giorno);
+}
+
+function festivitaFisse(anno){
+  return [
+    `${anno}-01-01`, `${anno}-01-06`, `${anno}-04-25`, `${anno}-05-01`,
+    `${anno}-06-02`, `${anno}-08-15`, `${anno}-11-01`, `${anno}-12-08`,
+    `${anno}-12-25`, `${anno}-12-26`
+  ];
+}
+
+function siglaAssenza(nome){
+  if(SIGLE_ASSENZE[nome]) return SIGLE_ASSENZE[nome];
+  return nome.split(/\s+/).map(p => p[0]).join('').substring(0, 4).toUpperCase() + '.';
+}
+
+function categoriaTurno(oraInizio, oraFine, dataStr){
+  const [hi, mi] = oraInizio.split(':').map(Number);
+  const [hf, mf] = oraFine.split(':').map(Number);
+  let inizio = new Date(dataStr + 'T00:00:00'); inizio.setHours(hi, mi, 0, 0);
+  let fine = new Date(dataStr + 'T00:00:00'); fine.setHours(hf, mf, 0, 0);
+  if(fine <= inizio) fine.setDate(fine.getDate() + 1);
+
+  const minuti = { mattina:0, pomeriggio:0, sera:0, notte:0 };
+  let cursore = new Date(inizio);
+  while(cursore < fine){
+    const h = cursore.getHours();
+    if(h >= 6 && h < 12) minuti.mattina++;
+    else if(h >= 12 && h < 18) minuti.pomeriggio++;
+    else if(h >= 18) minuti.sera++;
+    else minuti.notte++;
+    cursore = new Date(cursore.getTime() + 60000);
+  }
+  return Object.entries(minuti).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function eFestivoFisso(dataStr){
+  if(!dataStr) return false;
+  const d = new Date(dataStr + 'T00:00:00');
+  if(isNaN(d)) return false;
+  const anno = d.getFullYear();
+  const pasqua = calcolaPasqua(anno);
+  const pasquetta = new Date(pasqua); pasquetta.setDate(pasqua.getDate() + 1);
+  return festivitaFisse(anno).includes(dataStr) || dataISO(pasqua) === dataStr || dataISO(pasquetta) === dataStr;
+}
+
+function eDomenica(dataStr){
+  const d = new Date(dataStr + 'T00:00:00');
+  return !isNaN(d) && d.getDay() === 0;
+}
+
+function eFestivoOdDomenica(dataStr){ return eDomenica(dataStr) || eFestivoFisso(dataStr); }
+
+function classificaFinestra(inizio, fine){
+  const cat = { ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 };
+  if(!(fine > inizio)) return cat;
+  let cursore = new Date(inizio);
+  while(cursore < fine){
+    const ora = cursore.getHours();
+    const notte = ora >= 22 || ora < 6;
+    const iso = dataISO(cursore);
+    const domenica = eDomenica(iso);
+    const festivo = !domenica && eFestivoFisso(iso);
+    if(notte && (domenica || festivo)) cat.notturneFestive++;
+    else if(domenica) cat.domenicali++;
+    else if(festivo) cat.festive++;
+    else if(notte) cat.notturne++;
+    else cat.ordinarie++;
+    if(ora >= 18 && ora < 22) cat.serali++; // fascia serale, tracciata a parte per il controllo del territorio
+    cursore = new Date(cursore.getTime() + 60000); // passo di 1 minuto
+  }
+  for(const k in cat) cat[k] = round2(cat[k] / 60); // minuti → ore
+  return cat;
+}
+
+function finestraDaOrari(dataBase, oraInizioStr, oraFineStr){
+  if(!oraInizioStr || !oraFineStr) return { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  const [hs, ms] = oraInizioStr.split(':').map(Number);
+  const [he, me] = oraFineStr.split(':').map(Number);
+  let inizio = new Date(dataBase + 'T00:00:00'); inizio.setHours(hs, ms, 0, 0);
+  let fine = new Date(dataBase + 'T00:00:00'); fine.setHours(he, me, 0, 0);
+  if(fine <= inizio) fine.setDate(fine.getDate() + 1);
+  const ore = (fine - inizio) / 3600000;
+  if(ore > 24) return { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  return { ore: round2(ore), classificazione: classificaFinestra(inizio, fine) };
+}
+
+function classificaTurno(t){
+  const vuoto = {
+    oreTotali:0, ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0,
+    strDiurno:0, strNotturno:0, strFestivo:0, strNotturnoFestivo:0, oreCompensate:0, orePermessoBreve:0, oreRecuperoPermessoBreve:0, errore:null
+  };
+  if(!t || t.riposo || t.assenzaTipo) return vuoto;
+  if(!t.data || !t.oraInizio || !t.oraFine) return vuoto;
+
+  const [hi, mi] = t.oraInizio.split(':').map(Number);
+  const [hf, mf] = t.oraFine.split(':').map(Number);
+  let inizio = new Date(t.data + 'T00:00:00'); inizio.setHours(hi, mi, 0, 0);
+  let fine = new Date(t.data + 'T00:00:00'); fine.setHours(hf, mf, 0, 0);
+  if(fine <= inizio) fine.setDate(fine.getDate() + 1);
+
+  const oreTurno = (fine - inizio) / 3600000;
+  if(oreTurno > 24) return { ...vuoto, errore:'Turno superiore a 24 ore: controlla gli orari.' };
+
+  const base = classificaFinestra(inizio, fine);
+
+  // Permesso breve durante il turno: le ore si tolgono dalle ore lavorative (non contano come lavorate/pagate)
+  const permessoBreveCalc = t.permessoBreveAttivo ? finestraDaOrari(t.data, t.permessoBreveOraInizio, t.permessoBreveOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  const fpb = permessoBreveCalc.classificazione;
+  const baseNetta = {
+    ordinarie: round2(Math.max(0, base.ordinarie - fpb.ordinarie)),
+    notturne: round2(Math.max(0, base.notturne - fpb.notturne)),
+    festive: round2(Math.max(0, base.festive - fpb.festive)),
+    domenicali: round2(Math.max(0, base.domenicali - fpb.domenicali)),
+    notturneFestive: round2(Math.max(0, base.notturneFestive - fpb.notturneFestive)),
+    serali: round2(Math.max(0, base.serali - fpb.serali))
+  };
+  const oreTurnoNette = round2(Math.max(0, oreTurno - permessoBreveCalc.ore));
+
+  // Recupero permesso breve: finestra indipendente le cui ore, al contrario del permesso breve,
+  // si SOMMANO alle ore lavorate pagate normali (non sono straordinario, sono ore ordinarie recuperate).
+  const recuperoPBCalc = t.recuperoPermessoBreveAttivo ? finestraDaOrari(t.data, t.recuperoPermessoBreveOraInizio, t.recuperoPermessoBreveOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  const frpb = recuperoPBCalc.classificazione;
+  baseNetta.ordinarie = round2(baseNetta.ordinarie + frpb.ordinarie);
+  baseNetta.notturne = round2(baseNetta.notturne + frpb.notturne);
+  baseNetta.festive = round2(baseNetta.festive + frpb.festive);
+  baseNetta.domenicali = round2(baseNetta.domenicali + frpb.domenicali);
+  baseNetta.notturneFestive = round2(baseNetta.notturneFestive + frpb.notturneFestive);
+  baseNetta.serali = round2(baseNetta.serali + frpb.serali);
+
+  // Straordinario prima/dopo: finestre orarie indipendenti (dalle-alle), come il rientro.
+  // Un'eventuale pausa fra lo straordinario e il turno principale non viene conteggiata in alcuna categoria.
+  const primaCalc = finestraDaOrari(t.data, t.straordinarioPrimaInizio, t.straordinarioPrimaFine);
+  const dopoCalc = finestraDaOrari(t.data, t.straordinarioDopoInizio, t.straordinarioDopoFine);
+  const finestraPrima = primaCalc.classificazione, finestraDopo = dopoCalc.classificazione;
+  const strPrimaOre = primaCalc.ore, strDopoOre = dopoCalc.ore;
+
+  // Secondo segmento (rientro/turno spezzato con pausa): orario proprio, non contiguo al turno principale.
+  const secondoCalc = t.secondoAttivo ? finestraDaOrari(t.data, t.secondoOraInizio, t.secondoOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  const finestraSecondo = secondoCalc.classificazione, oreSecondo = secondoCalc.ore;
+
+  const strDiurno = round2(finestraPrima.ordinarie + finestraDopo.ordinarie + finestraSecondo.ordinarie);
+  const strNotturno = round2(finestraPrima.notturne + finestraDopo.notturne + finestraSecondo.notturne);
+  const strFestivo = round2(finestraPrima.festive + finestraPrima.domenicali + finestraDopo.festive + finestraDopo.domenicali + finestraSecondo.festive + finestraSecondo.domenicali);
+  const strNotturnoFestivo = round2(finestraPrima.notturneFestive + finestraDopo.notturneFestive + finestraSecondo.notturneFestive);
+
+  // Se lo straordinario del giorno è convertito in riposo compensativo, non entra nel calcolo della paga:
+  // le ore restano tracciate a parte (oreCompensate) invece di alimentare le categorie retribuite.
+  const oreStraordinarioLavorate = round2(strDiurno + strNotturno + strFestivo + strNotturnoFestivo);
+  const compensato = !!t.compensaStraordinario;
+
+  return {
+    oreTotali: round2(oreTurnoNette + strPrimaOre + strDopoOre + oreSecondo),
+    ordinarie: baseNetta.ordinarie, notturne: baseNetta.notturne, festive: baseNetta.festive,
+    domenicali: baseNetta.domenicali, notturneFestive: baseNetta.notturneFestive, serali: baseNetta.serali,
+    strDiurno: compensato ? 0 : strDiurno,
+    strNotturno: compensato ? 0 : strNotturno,
+    strFestivo: compensato ? 0 : strFestivo,
+    strNotturnoFestivo: compensato ? 0 : strNotturnoFestivo,
+    oreCompensate: compensato ? oreStraordinarioLavorate : 0,
+    orePermessoBreve: permessoBreveCalc.ore,
+    oreRecuperoPermessoBreve: recuperoPBCalc.ore,
+    errore: null
+  };
+}
+
+function calcolaIndennitaMissioneOre(ore){
+  if(ore <= 4) return 0;
+  if(ore <= 8) return round2(ore * AppState.tabelle.indennitaTrasfertaOraria);
+  return round2(ore * AppState.tabelle.indennitaTrasfertaOrariaRidotta); // oltre 8h: tariffa ridotta al 40%
+}
+
+function calcolaRiepilogoOreMese(anno, mese){
+  const tot = { ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, strDiurno:0, strNotturno:0, strFestivo:0, strNotturnoFestivo:0 };
+  let riposi = 0, reperibilita = 0, missioni = 0, servizioEsterno = 0, ordinePubblico = 0, buoniPasto = 0, indennitaOPTotale = 0, oreCompensateTotale = 0;
+  let giorniControlloTerritorioSerali = 0, giorniControlloTerritorioNotturni = 0, indennitaMissioniTotale = 0, turniServizioEsternoValidi = 0, turniFestiviLavorati = 0, turniFestivitaParticolare = 0, turniCompensazioneRiposo = 0, turniCambioTurno = 0, giorniPresenzaEffettiva = 0;
+  const giorniNelMese = new Date(anno, mese + 1, 0).getDate();
+  for(let g = 1; g <= giorniNelMese; g++){
+    const iso = dataISO(new Date(anno, mese, g));
+    const t = AppState.turni[iso];
+    if(!t) continue;
+    if(t.riposo){ riposi++; continue; }
+    // Un giorno con un'assenza selezionata (es. Congedo ordinario) non genera nessuna indennità accessoria,
+    // anche se sono rimaste spuntate delle voci da quando il giorno era un turno lavorato normale
+    // (es. inserito prima con la sequenza automatica, poi convertito in assenza).
+    if(t.assenzaTipo) continue;
+    const c = classificaTurno(t);
+    for(const k of Object.keys(tot)) tot[k] += c[k] || 0;
+    oreCompensateTotale += c.oreCompensate || 0;
+    if(t.reperibilita) reperibilita++;
+    if(t.missione){
+      missioni++;
+      const oreMissione = Number(t.durataMissioneOre) || c.oreTotali || 0;
+      indennitaMissioniTotale += calcolaIndennitaMissioneOre(oreMissione);
+    }
+    if(t.servizioEsterno){
+      servizioEsterno++;
+      if((c.oreTotali || 0) >= 3) turniServizioEsternoValidi++; // richiede almeno 3 ore continuative
+    }
+    if(t.ordinePubblico){
+      ordinePubblico++;
+      if((c.oreTotali || 0) >= 4){
+        let importoOP = t.opSede === 'fuori' ? AppState.tabelle.indennitaOPFuoriSede : AppState.tabelle.indennitaOPInSede;
+        if(t.opSede === 'fuori' && t.opPernottamento === false){
+          importoOP = round2(importoOP * (1 - AppState.tabelle.riduzioneOPSenzaPernottamento / 100));
+        }
+        indennitaOPTotale += importoOP;
+      }
+    }
+    if(t.buonoPasto) buoniPasto++;
+    if(t.compensazioneRiposo) turniCompensazioneRiposo++;
+    if(t.cambioTurno) turniCambioTurno++;
+    if(t.oraInizio && t.oraFine && !t.assenzaTipo) giorniPresenzaEffettiva++;
+    if((c.festive || 0) + (c.domenicali || 0) + (c.notturneFestive || 0) > 0) turniFestiviLavorati++;
+    if(eFestivoFisso(t.data) && (c.oreTotali || 0) > 0) turniFestivitaParticolare++;
+    // Indennità controllo territorio: serve almeno 3h continuative nella fascia, e NON è cumulabile con l'ordine pubblico
+    // (fonte: normativa citata dall'utente — D.Lgs./contratto recepito con D.P.C.M. 2022 n.57, in vigore dal 31/12/2021)
+    if(t.controlloTerritorio && !t.ordinePubblico){
+      const oreSerali = c.serali || 0, oreNotturne = c.notturne || 0;
+      if(oreSerali < 3 && oreNotturne < 3){ /* meno di 3h continuative in entrambe le fasce: nessuna indennità */ }
+      else if(oreNotturne > oreSerali) giorniControlloTerritorioNotturni++;
+      else giorniControlloTerritorioSerali++; // fascia serale prevalente, o parità
+    }
+  }
+  return { tot, riposi, reperibilita, missioni, servizioEsterno, ordinePubblico, buoniPasto, turniServizioEsternoValidi, turniFestiviLavorati, turniFestivitaParticolare, turniCompensazioneRiposo, turniCambioTurno, giorniPresenzaEffettiva, oreCompensateTotale: round2(oreCompensateTotale),
+    giorniControlloTerritorioSerali, giorniControlloTerritorioNotturni, indennitaMissioniTotale: round2(indennitaMissioniTotale),
+    indennitaOPTotale: round2(indennitaOPTotale) };
+}
+
+function aggiornaRiepilogoMensile(){
+  const { tot, riposi, reperibilita, missioni, servizioEsterno, ordinePubblico, buoniPasto, giorniControlloTerritorioSerali, giorniControlloTerritorioNotturni, oreCompensateTotale } = calcolaRiepilogoOreMese(annoCorrente, meseCorrente);
+
+  el('rOrdinarie').textContent = round2(tot.ordinarie).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rNotturne').textContent = round2(tot.notturne).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rFestive').textContent = round2(tot.festive).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rDomenicali').textContent = round2(tot.domenicali).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rNotturneFestive').textContent = round2(tot.notturneFestive).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rStrDiurno').textContent = round2(tot.strDiurno).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rStrNotturno').textContent = round2(tot.strNotturno).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rStrFestivo').textContent = round2(tot.strFestivo).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rStrNotturnoFestivo').textContent = round2(tot.strNotturnoFestivo).toLocaleString('it-IT', {minimumFractionDigits:2});
+  el('rRiposi').textContent = riposi;
+  el('rReperibilita').textContent = reperibilita;
+  el('rMissioni').textContent = missioni;
+  el('rServizioEsterno').textContent = servizioEsterno;
+  el('rOrdinePubblico').textContent = ordinePubblico;
+  el('rControlloTerritorio').textContent = `${giorniControlloTerritorioSerali} serale · ${giorniControlloTerritorioNotturni} notturno`;
+  el('rBuoniPasto').textContent = `${buoniPasto} (${euro(round2(buoniPasto * AppState.tabelle.buonoPastoValore))})`;
+  el('rOreCompensate').textContent = round2(oreCompensateTotale).toLocaleString('it-IT', {minimumFractionDigits:2});
+}
+
+let filtroCalendario = 'tutti';
+
+function categoriaFiltroCalendario(t, categoria){
+  if(!t) return 'vuoto';
+  if(t.assenzaTipo) return 'assenze';
+  if(t.riposo) return 'riposi';
+  const extra = !!(t.missione || t.servizioEsterno || t.reperibilita || t.ordinePubblico || t.controlloTerritorio || t.buonoPasto || t.aggiornamentoProfessionale || t.addestramentoTiro || t.servizioSvolto || t.straordinarioPrimaInizio || t.straordinarioDopoInizio || t.secondoAttivo);
+  if(extra) return 'extra';
+  if(categoria) return 'turni';
+  return 'vuoto';
+}
+
+function aggiornaFiltriCalendario(){
+  document.querySelectorAll('#calendarioFiltri .filtro-calendario').forEach(btn => {
+    const attivo = btn.dataset.filtro === filtroCalendario;
+    btn.classList.toggle('attivo', attivo);
+    btn.setAttribute('aria-pressed', attivo ? 'true' : 'false');
+  });
+}
+
+function impostaFiltroCalendario(filtro){
+  filtroCalendario = filtro || 'tutti';
+  const select = el('filtroCalendarioSelect');
+  if(select) select.value = filtroCalendario;
+  aggiornaFiltriCalendario();
+  document.querySelectorAll('#calendarioGriglia .giorno-cella:not(.vuota)').forEach(cella => {
+    const tipo = cella.dataset.filtro || 'vuoto';
+    const visibile = filtroCalendario === 'tutti' || tipo === filtroCalendario || (filtroCalendario === 'turni' && tipo === 'extra');
+    cella.classList.toggle('filtro-nascosto', !visibile);
+    cella.setAttribute('aria-hidden', visibile ? 'false' : 'true');
+  });
+}
+
+function renderCalendario(){
+  el('etichettaMese').textContent = `${NOMI_MESI[meseCorrente]} ${annoCorrente}`;
+  el('campoConguagliMese').value = AppState.conguagliPerMese[chiaveMese(annoCorrente, meseCorrente)] || 0;
+  const griglia = el('calendarioGriglia');
+  griglia.innerHTML = '';
+
+  const isoOggi = dataISO(new Date());
+  const primoGiorno = new Date(annoCorrente, meseCorrente, 1);
+  const giorniNelMese = new Date(annoCorrente, meseCorrente + 1, 0).getDate();
+  const offset = (primoGiorno.getDay() + 6) % 7;
+
+  // Se il mese cambia, manteniamo una selezione valida e prevedibile.
+  const prefissoMese = `${annoCorrente}-${String(meseCorrente + 1).padStart(2,'0')}`;
+  if(!giornoSelezionato || giornoSelezionato.slice(0,7) !== prefissoMese){
+    giornoSelezionato = isoOggi.slice(0,7) === prefissoMese
+      ? isoOggi
+      : dataISO(new Date(annoCorrente, meseCorrente, 1));
+  }
+
+  for(let i = 0; i < offset; i++){
+    const vuota = document.createElement('div');
+    vuota.className = 'giorno-cella vuota';
+    vuota.setAttribute('aria-hidden','true');
+    griglia.appendChild(vuota);
+  }
+
+  for(let g = 1; g <= giorniNelMese; g++){
+    const d = new Date(annoCorrente, meseCorrente, g);
+    const iso = dataISO(d);
+    const t = AppState.turni[iso];
+    const sabato = d.getDay() === 6;
+    const domenica = d.getDay() === 0;
+    const festivo = eFestivoFisso(iso);
+    const cella = document.createElement('button');
+    cella.type = 'button';
+    let classi = 'giorno-cella';
+    let categoria = null;
+
+    if(sabato) classi += ' sabato';
+    if(domenica) classi += ' domenica';
+    if(festivo || domenica) classi += ' festivo';
+
+    if(t && t.riposo){
+      classi += ' tipo-riposo riposo-giorno';
+      categoria = 'riposo';
+    } else if(t && t.assenzaTipo){
+      classi += ' tipo-assenza';
+      categoria = 'assenza';
+    } else if(t && t.oraInizio && t.oraFine){
+      categoria = categoriaTurno(t.oraInizio, t.oraFine, t.data);
+      classi += ' ha-turno tipo-' + categoria;
+    }
+
+    if(t && t.generatoAutomaticamente) classi += ' auto-generato';
+    if(iso === isoOggi) classi += ' oggi';
+    if(iso === giornoSelezionato) classi += ' selezionata';
+
+    const voceAssenza = t && t.assenzaTipo
+      ? AppState.assenze.find(a => a.id === t.assenzaTipo)
+      : null;
+
+    const nomeCategoria = categoria === 'assenza'
+      ? 'Assenza'
+      : categoria === 'riposo'
+        ? 'Riposo'
+        : categoria ? (INIZIALE_CATEGORIA[categoria] || categoria) : 'Libero';
+
+    // Codice breve per la cella: il nome completo resta disponibile in aria-label/title.
+    const codiceCategoria = categoria === 'assenza' ? 'A'
+      : categoria === 'riposo' ? 'R'
+      : categoria ? (CODICE_CATEGORIA[categoria] || INIZIALE_CATEGORIA[categoria] || categoria) : '—';
+
+    let etichetta = categoria === 'assenza'
+      ? siglaAssenza(voceAssenza ? voceAssenza.nome : 'Assenza')
+      : categoria ? INIZIALE_CATEGORIA[categoria] : '';
+
+    if(t && t.aggiornamentoProfessionale) etichetta = 'AGG';
+    else if(t && t.addestramentoTiro) etichetta = 'TIRI';
+
+    const ore = t && !t.riposo && !t.assenzaTipo && t.oraInizio && t.oraFine
+      ? classificaTurno(t).oreTotali
+      : 0;
+
+    const haStraordinario = !!(t && (
+      (t.straordinarioPrimaInizio && t.straordinarioPrimaFine) ||
+      (t.straordinarioDopoInizio && t.straordinarioDopoFine) ||
+      (t.secondoAttivo && t.secondoOraInizio && t.secondoOraFine)
+    ));
+    const haMissione = !!(t && t.missione);
+    const haAssenza = !!(t && t.assenzaTipo);
+    const haServizioEsterno = !!(t && t.servizioEsterno);
+    const haReperibilita = !!(t && t.reperibilita);
+    const haOP = !!(t && t.ordinePubblico);
+    const haControllo = !!(t && t.controlloTerritorio);
+    const haBuono = !!(t && t.buonoPasto);
+    const haNota = !!(t && t.servizioSvolto);
+
+    if(haStraordinario) classi += ' ha-straordinario';
+    if(haMissione) classi += ' ha-missione';
+    if(haAssenza) classi += ' ha-assenza';
+    if(haServizioEsterno) classi += ' ha-servizio-esterno';
+    if(haReperibilita) classi += ' ha-reperibilita';
+    if(haOP) classi += ' ha-op';
+
+    const badge = [];
+    if(haStraordinario) badge.push('<span class="giorno-badge badge-straordinario" title="Straordinario" aria-label="Straordinario">⏱</span>');
+    if(haMissione) badge.push('<span class="giorno-badge badge-missione" title="Missione" aria-label="Missione">◆</span>');
+    if(haAssenza) badge.push('<span class="giorno-badge badge-assenza" title="Assenza" aria-label="Assenza">A</span>');
+    if(haServizioEsterno) badge.push('<span class="giorno-badge badge-esterno" title="Servizio esterno" aria-label="Servizio esterno">◆</span>');
+    if(haOP) badge.push('<span class="giorno-badge badge-op" title="Ordine pubblico" aria-label="Ordine pubblico">OP</span>');
+    if(haReperibilita) badge.push('<span class="giorno-badge badge-reperibilita" title="Reperibilità" aria-label="Reperibilità">★</span>');
+    if(haControllo) badge.push('<span class="giorno-badge badge-controllo" title="Controllo territorio" aria-label="Controllo territorio">CT</span>');
+    if(haBuono) badge.push('<span class="giorno-badge badge-buono" title="Buono pasto" aria-label="Buono pasto">€</span>');
+    if(haNota) badge.push('<span class="giorno-badge badge-nota" title="Nota servizio" aria-label="Nota servizio">✎</span>');
+
+    // Su mobile mostriamo solo i primi 3 indicatori e un contatore +N.
+    const badgeVisibili = badge.slice(0, 3);
+    if(badge.length > 3){
+      badgeVisibili.push(`<span class="giorno-badge badge-more" title="Altri ${badge.length - 3} indicatori">+${badge.length - 3}</span>`);
+    }
+
+    const orario = t && t.oraInizio && t.oraFine && !t.riposo && !t.assenzaTipo
+      ? `<span class="giorno-orario">${escapeHtml(t.oraInizio)}–${escapeHtml(t.oraFine)}</span>`
+      : '';
+    const oreLabel = ore > 0 ? `<span class="giorno-ore">${String(ore).replace('.',',')}h</span>` : '';
+    const tipoLabel = categoria === 'assenza'
+      ? escapeHtml(voceAssenza ? voceAssenza.nome : 'Assenza')
+      : categoria === 'riposo'
+        ? 'Riposo'
+        : etichetta || 'Libero';
+
+    cella.className = classi;
+    cella.dataset.filtro = categoriaFiltroCalendario(t, categoria);
+    cella.setAttribute('aria-label', `${g} ${NOMI_MESI[meseCorrente]} ${annoCorrente}: ${nomeCategoria}${orario ? ', ' + t.oraInizio + '–' + t.oraFine : ''}${haStraordinario ? ', straordinario' : ''}${haMissione ? ', missione' : ''}${haAssenza ? ', assenza' : ''}`);
+    cella.title = `${g} ${NOMI_MESI[meseCorrente]} — ${nomeCategoria}${haStraordinario ? ' · Straordinario' : ''}${haMissione ? ' · Missione' : ''}`;
+
+    cella.innerHTML = `
+      <span class="giorno-topline">
+        <span class="giorno-numero">${g}</span>
+        <span class="giorno-badge-list">${badgeVisibili.join('')}</span>
+      </span>
+      <span class="giorno-turno-badge" title="${escapeHtml(nomeCategoria)}"><span class="giorno-turno-codice">${escapeHtml(codiceCategoria)}</span><span class="giorno-turno-nome">${escapeHtml(tipoLabel)}</span></span>
+      ${orario || oreLabel ? `<span class="giorno-meta">${orario}${oreLabel}</span>` : '<span class="giorno-meta giorno-meta-vuoto">—</span>'}
+    `;
+
+    cella.addEventListener('click', () => selezionaGiorno(iso));
+    griglia.appendChild(cella);
+  }
+
+  aggiornaFiltriCalendario();
+  impostaFiltroCalendario(filtroCalendario);
+  aggiornaDettaglioGiorno();
+  aggiornaRiepilogoMensile();
+  if(typeof aggiornaDashboard === 'function') aggiornaDashboard();
+  if(typeof aggiornaRiepilogoVisualeMese === 'function') aggiornaRiepilogoVisualeMese();
+}
+
+function selezionaGiorno(iso){
+  giornoSelezionato = iso;
+  // aggiorna solo le classi di selezione, senza ricostruire l'intera griglia
+  document.querySelectorAll('#calendarioGriglia .giorno-cella').forEach(c => c.classList.remove('selezionata'));
+  const celle = document.querySelectorAll('#calendarioGriglia .giorno-cella:not(.vuota)');
+  const cellaTrovata = [...celle].find(c => c.querySelector('.giorno-numero').textContent === String(Number(iso.slice(8,10))));
+  if(cellaTrovata) cellaTrovata.classList.add('selezionata');
+  aggiornaDettaglioGiorno();
+}
+
+function formatOreMinuti(valore){
+  const n = Number(valore || 0);
+  if(!Number.isFinite(n) || n <= 0) return '0:00';
+  const ore = Math.floor(n);
+  const minuti = Math.round((n - ore) * 60);
+  if(minuti === 60) return `${ore + 1}:00`;
+  return `${ore}:${String(minuti).padStart(2,'0')}`;
+}
+
+function totaleStraordinario(c){
+  return Number(c?.strDiurno || 0) + Number(c?.strNotturno || 0) + Number(c?.strFestivo || 0) + Number(c?.strNotturnoFestivo || 0);
+}
+
+function aggiornaDettaglioGiorno(){
+  if(!giornoSelezionato) return;
+  const d = new Date(giornoSelezionato + 'T00:00:00');
+  const titolo = el('dettaglioGiornoTitolo');
+  titolo.textContent = `${NOMI_GIORNI[d.getDay()]} ${d.getDate()} ${NOMI_MESI[d.getMonth()]} ${d.getFullYear()}`;
+  const t = AppState.turni[giornoSelezionato];
+  const corpo = el('dettaglioGiornoCorpo');
+  const btnModifica = el('btnModificaGiorno');
+  const btnRimuovi = el('btnRimuoviGiorno');
+  const azioni = document.querySelector('.dettaglio-giorno-azioni-principali');
+
+  if(btnModifica){
+    btnModifica.onclick = () => apriModaleTurno(giornoSelezionato);
+    btnModifica.textContent = t ? '✎ Modifica giorno' : '＋ Aggiungi turno';
+  }
+  if(btnRimuovi){
+    btnRimuovi.hidden = !t;
+    btnRimuovi.onclick = () => {
+      if(!t) return;
+      const messaggio = `Vuoi rimuovere il turno del ${d.getDate()} ${NOMI_MESI[d.getMonth()]}?`;
+      if(typeof mostraConferma === 'function'){
+        mostraConferma(messaggio, () => {
+          delete AppState.turni[giornoSelezionato];
+          if(typeof salvaTurniStorage === 'function') salvaTurniStorage();
+          renderCalendario();
+        }, 'Rimuovi turno');
+      } else {
+        delete AppState.turni[giornoSelezionato];
+        if(typeof salvaTurniStorage === 'function') salvaTurniStorage();
+        renderCalendario();
+      }
+    };
+  }
+  if(azioni) azioni.hidden = false;
+
+  if(!t){
+    corpo.innerHTML = `
+      <div class="giorno-vuoto-card">
+        <span class="giorno-vuoto-icona">＋</span>
+        <div><strong>Nessun turno inserito</strong><span>Aggiungi il turno o segnala un'assenza per questa giornata.</span></div>
+      </div>`;
+  } else if(t.assenzaTipo){
+    const voceAssenza = AppState.assenze.find(a => a.id === t.assenzaTipo);
+    const nome = voceAssenza ? voceAssenza.nome : 'Assenza';
+    corpo.innerHTML = `
+      <div class="dettaglio-hero dettaglio-hero-assenza">
+        <div class="dettaglio-hero-badge">A</div>
+        <div><strong>${escapeHtml(nome)}</strong><span>Giornata registrata come assenza</span></div>
+      </div>
+      <div class="dettaglio-indicatori">
+        <div><span>Stato</span><strong>Assenza</strong></div>
+        <div><span>Data</span><strong>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</strong></div>
+        <div><span>Ore turno</span><strong>—</strong></div>
+      </div>`;
+  } else if(t.riposo){
+    corpo.innerHTML = `
+      <div class="dettaglio-hero dettaglio-hero-riposo">
+        <div class="dettaglio-hero-badge">R</div>
+        <div><strong>Riposo</strong><span>Giornata senza turno programmato</span></div>
+      </div>
+      <div class="dettaglio-indicatori">
+        <div><span>Stato</span><strong>Riposo</strong></div>
+        <div><span>Ore lavoro</span><strong>0:00</strong></div>
+        <div><span>Extra</span><strong>—</strong></div>
+      </div>`;
+  } else if(t.oraInizio && t.oraFine){
+    const c = classificaTurno(t);
+    const straordinario = totaleStraordinario(c);
+    const totaleGiorno = Number(c.oreTotali || 0) + straordinario;
+    const categoria = categoriaTurno(t.oraInizio, t.oraFine, t.data);
+    const etichetta = INIZIALE_CATEGORIA[categoria] || categoria || 'Turno';
+    const servizi = [];
+    if(t.missione) servizi.push(['missione','🛡','Missione']);
+    if(t.servizioEsterno) servizi.push(['esterno','🚓','Servizio esterno']);
+    if(t.reperibilita) servizi.push(['reperibilita','★','Reperibilità']);
+    if(t.controlloTerritorio) servizi.push(['controllo','⌾','Controllo territorio']);
+    if(t.ordinePubblico) servizi.push(['op','⬟','Ordine pubblico']);
+    if(t.buonoPasto) servizi.push(['buono','€','Buono pasto']);
+    if(t.aggiornamentoProfessionale) servizi.push(['agg','◎','Aggiornamento']);
+    if(t.addestramentoTiro) servizi.push(['tiro','◉','Addestramento tiro']);
+    const servizioPrincipale = t.servizioSvolto || (servizi[0] ? servizi[0][2] : 'Servizio ordinario');
+    const badges = [];
+    if(straordinario > 0) badges.push('<span class="dettaglio-pill pill-straordinario">⏱ Straordinario</span>');
+    if(t.missione) badges.push('<span class="dettaglio-pill pill-missione">🛡 Missione</span>');
+    if(t.servizioEsterno) badges.push('<span class="dettaglio-pill pill-esterno">🚓 Esterno</span>');
+    if(t.reperibilita) badges.push('<span class="dettaglio-pill pill-reperibilita">★ Reperibilità</span>');
+    corpo.innerHTML = `
+      <div class="dettaglio-hero dettaglio-hero-${escapeHtml(categoria || 'turno')}">
+        <div class="dettaglio-hero-badge">${escapeHtml(etichetta)}</div>
+        <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(c.oreTotali)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
+      </div>
+      ${badges.length ? `<div class="dettaglio-pills">${badges.join('')}</div>` : ''}
+      <div class="dettaglio-indicatori">
+        <div><span>Ore lavoro</span><strong>${formatOreMinuti(c.oreTotali)}</strong></div>
+        <div><span>Straordinario</span><strong class="valore-straordinario">${formatOreMinuti(straordinario)}</strong></div>
+        <div><span>Totale giorno</span><strong>${formatOreMinuti(totaleGiorno)}</strong></div>
+      </div>
+      <div class="dettaglio-sezione-titolo">Indicatori del giorno</div>
+      <div class="dettaglio-indicatori-icone">
+        ${servizi.length ? servizi.slice(0,4).map(x => `<div><span class="indicatore-icona indicatore-${x[0]}">${x[1]}</span><small>${escapeHtml(x[2])}</small></div>`).join('') : '<div class="dettaglio-nessun-extra">Nessun indicatore extra</div>'}
+      </div>
+      <div class="dettaglio-sezione-titolo">Dettagli</div>
+      <div class="dettaglio-dettagli-lista">
+        <div><span>◷ Servizio</span><strong>${escapeHtml(servizioPrincipale)}</strong></div>
+        <div><span>★ Reperibilità</span><strong>${t.reperibilita ? 'Sì' : 'No'}</strong></div>
+        <div><span>⇄ Cambio turno</span><strong>${t.cambioTurno ? 'Sì' : 'No'}</strong></div>
+        <div><span>🍴 Buono pasto</span><strong>${t.buonoPasto ? 'Sì' : 'No'}</strong></div>
+        <div><span>◎ Aggiornamento</span><strong>${t.aggiornamentoProfessionale ? 'Sì' : 'No'}</strong></div>
+      </div>`;
+  } else {
+    corpo.innerHTML = `<div class="giorno-vuoto-card"><span class="giorno-vuoto-icona">⚠</span><div><strong>Turno incompleto</strong><span>Inserisci ora di inizio e fine per completare la giornata.</span></div></div>`;
+  }
+  el('btnCopiaTurno').disabled = !t;
+  el('btnIncollaTurno').disabled = !turnoCopiato;
+  el('campoNotaGiorno').value = AppState.noteGiorni[giornoSelezionato] || '';
+}
+
+const REGIONI_ADDIZIONALE_2026 = {
+  "Abruzzo": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.67}, {fino:50000.0, aliquota:2.87}, {fino:Infinity, aliquota:3.33}] },
+  "Basilicata": { tipo:'unica', valore:1.23 },
+  "Calabria": { tipo:'unica', valore:1.73 },
+  "Campania": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:2.96}, {fino:50000.0, aliquota:3.2}, {fino:Infinity, aliquota:3.33}] },
+  "Emilia-Romagna": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.33}, {fino:28000.0, aliquota:1.93}, {fino:50000.0, aliquota:2.78}, {fino:Infinity, aliquota:3.33}] },
+  "Friuli Venezia Giulia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:0.7}, {fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.23}] },
+  "Lazio": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:3.33}, {fino:50000.0, aliquota:3.33}, {fino:Infinity, aliquota:3.33}] },
+  "Liguria": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:3.18}, {fino:Infinity, aliquota:3.23}] },
+  "Lombardia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.58}, {fino:50000.0, aliquota:1.72}, {fino:Infinity, aliquota:1.73}] },
+  "Marche": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.53}, {fino:50000.0, aliquota:1.7}, {fino:Infinity, aliquota:1.73}] },
+  "Molise": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:1.93}, {fino:50000.0, aliquota:3.33}, {fino:Infinity, aliquota:3.33}] },
+  "Piemonte": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.62}, {fino:28000.0, aliquota:2.68}, {fino:50000.0, aliquota:3.31}, {fino:Infinity, aliquota:3.33}] },
+  "Provincia di Bolzano": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.73}] },
+  "Provincia di Trento": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.73}] },
+  "Puglia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.33}, {fino:28000.0, aliquota:1.43}, {fino:50000.0, aliquota:1.63}, {fino:Infinity, aliquota:1.85}] },
+  "Sardegna": { tipo:'unica', valore:1.23 },
+  "Sicilia": { tipo:'unica', valore:1.23 },
+  "Toscana": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.42}, {fino:28000.0, aliquota:1.43}, {fino:50000.0, aliquota:3.32}, {fino:Infinity, aliquota:3.33}] },
+  "Umbria": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:3.02}, {fino:50000.0, aliquota:3.12}, {fino:Infinity, aliquota:3.33}] },
+  "Valle d'Aosta": { tipo:'unica', valore:1.23 },
+  "Veneto": { tipo:'unica', valore:1.23 },
+};
+
+const MODELLI_TURNO = {
+  mattina:     { oraInizio:'07:00', oraFine:'13:00', etichetta:'Mattina (07:00–13:00)' },
+  pomeriggio:  { oraInizio:'13:00', oraFine:'19:00', etichetta:'Pomeriggio (13:00–19:00)' },
+  sera24:      { oraInizio:'19:00', oraFine:'00:00', etichetta:'Sera (19:00–24:00)' },
+  sera01:      { oraInizio:'19:00', oraFine:'01:00', etichetta:'Sera (19:00–01:00)' },
+  notte00:     { oraInizio:'00:00', oraFine:'07:00', etichetta:'Notte (00:00–07:00)' },
+  notte01:     { oraInizio:'01:00', oraFine:'07:00', etichetta:'Notte (01:00–07:00)' },
+  mattutino:   { oraInizio:'08:00', oraFine:'14:00', etichetta:'Turno 08:00–14:00' },
+  pomeridiano: { oraInizio:'14:00', oraFine:'20:00', etichetta:'Turno 14:00–20:00' }
+};
+
+const INIZIALE_CATEGORIA = { mattina:'Mattina', pomeriggio:'Pomeriggio', sera:'Sera', notte:'Notte', riposo:'Riposo' };
+const CODICE_CATEGORIA = { mattina:'M', pomeriggio:'P', sera:'S', notte:'N', riposo:'R' };
+
+const SIGLE_ASSENZE = {
+  'Congedo ordinario': 'C.O.',
+  'Congedo straordinario': 'C.S.',
+  'Riposo legge': 'P.L.',
+  'Riposo settimanale': 'R.S.',
+  'Riposo festivo': 'R.F.',
+  'Recupero riposo': 'R.R.',
+  'Riposo compensativo': 'R.C.',
+  'Aspettativa': 'Asp.',
+  'Maternità/Paternità': 'Mat.P.',
+  'Congedo parentale': 'C.Par.',
+  'L104': 'L104',
+  'Donazione sangue': 'D.San',
+  'Ore studio': 'Stud',
+  'Permesso breve': 'P.Bre',
+  'Permesso sindacale': 'P.Sin',
+  'Permesso lutto/grave infermità familiare': 'P.Lu.'
+};
+
+const NOMI_MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+const NOMI_GIORNI = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+
+function inizializzaFiltriCalendario(){
+  document.querySelectorAll('#calendarioFiltri .filtro-calendario').forEach(btn => {
+    btn.addEventListener('click', () => impostaFiltroCalendario(btn.dataset.filtro));
+  });
+  aggiornaFiltriCalendario();
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inizializzaFiltriCalendario);
+else inizializzaFiltriCalendario();

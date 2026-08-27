@@ -1,0 +1,93 @@
+/* FASE 1 — modulo estratto dal precedente script.js. */
+
+function mostraAvviso(messaggio, titolo){
+  el('titoloAvviso').textContent = titolo || 'Avviso';
+  el('testoAvviso').textContent = messaggio;
+  el('btnAnnullaAvviso').hidden = true;
+  el('btnConfermaAvviso').textContent = 'OK';
+  el('btnConfermaAvviso').onclick = () => { el('overlayAvviso').hidden = true; };
+  el('overlayAvviso').hidden = false;
+}
+
+function mostraConferma(messaggio, alConfermare, titolo){
+  el('titoloAvviso').textContent = titolo || 'Conferma';
+  el('testoAvviso').textContent = messaggio;
+  el('btnAnnullaAvviso').hidden = false;
+  el('btnConfermaAvviso').textContent = 'Continua';
+  el('btnAnnullaAvviso').onclick = () => { el('overlayAvviso').hidden = true; };
+  el('btnConfermaAvviso').onclick = () => { el('overlayAvviso').hidden = true; alConfermare(); };
+  el('overlayAvviso').hidden = false;
+}
+
+function mostraScheda(nome){
+  const viste = { turni: 'vistaTurni', cedolino: 'vistaCedolino', assenze: 'vistaAssenze', tabelle: 'vistaTabelle', anagrafica: 'vistaAnagrafica', statistiche: 'vistaStatistiche', impostazioni: 'vistaImpostazioni' };
+  const tab = { turni: 'tabTurni', cedolino: 'tabCedolino', assenze: 'tabAssenze', tabelle: 'btnTabelle', anagrafica: 'btnAnagrafica' };
+  const vistaPrincipale = nome === 'sequenza' ? 'impostazioni' : nome;
+  Object.keys(viste).forEach(k => { const n = el(viste[k]); if(n) n.hidden = (k !== vistaPrincipale); });
+  Object.keys(tab).forEach(k => { const n = el(tab[k]); if(n) n.classList.toggle('attiva', k === vistaPrincipale); });
+  if(nome === 'assenze') renderAssenze();
+  if(nome === 'tabelle') renderTabelle();
+  if(nome === 'anagrafica') popolaFormAnagrafica();
+  if(nome === 'sequenza'){
+    const host = el('sezioneSequenzaHost');
+    const seq = el('sezioneSequenza');
+    if(host && seq && seq.parentElement !== host) host.appendChild(seq);
+    if(seq) seq.hidden = false;
+    renderSequenza();
+  } else {
+    const seq = el('sezioneSequenza');
+    if(seq) seq.hidden = true;
+  }
+  if(nome === 'statistiche'){ const a=el('campoAnnoStatistiche'); if(a && !a.value) a.value=new Date().getFullYear(); renderStatistiche(); }
+  if(nome === 'impostazioni') inizializzaImpostazioni();
+  window.scrollTo({ top:0, behavior:'instant' });
+}
+
+
+/* V20 — Notifiche non invasive */
+let _toastTimer = null;
+function mostraToast(messaggio, tipo='successo', durata=3200){
+  const box = el('toastContainer');
+  if(!box) return;
+  const icone = {successo:'✓', errore:'!', avviso:'⚠', info:'i'};
+  const toast = document.createElement('div');
+  toast.className = `toast-v20 toast-${tipo}`;
+  toast.setAttribute('role','status');
+  toast.innerHTML = `<span class="toast-icon">${icone[tipo] || 'i'}</span><span class="toast-text"></span><button type="button" class="toast-close" aria-label="Chiudi">×</button>`;
+  toast.querySelector('.toast-text').textContent = messaggio;
+  toast.querySelector('.toast-close').onclick = () => toast.remove();
+  box.appendChild(toast);
+  requestAnimationFrame(()=>toast.classList.add('visibile'));
+  window.setTimeout(()=>{ toast.classList.remove('visibile'); window.setTimeout(()=>toast.remove(),220); }, durata);
+}
+
+function aggiornaAvvisiApp(){
+  const out = [];
+  const oggi = new Date();
+  const isoOggi = dataISO(oggi);
+  const chiaveMese = `${oggi.getFullYear()}-${String(oggi.getMonth()+1).padStart(2,'0')}`;
+  const turniMese = Object.keys(AppState.turni || {}).filter(k=>k.startsWith(chiaveMese));
+  if(turniMese.length === 0) out.push({tipo:'info', testo:'Nessun turno registrato nel mese corrente. Se hai già la turnazione, puoi generarla o inserirla dal calendario.'});
+  const ultimo = TurniPSStorage.getItem(CHIAVE_ULTIMO_BACKUP);
+  if(Object.keys(AppState.turni || {}).length && !ultimo) out.push({tipo:'avviso', testo:'Backup non ancora effettuato: esporta una copia dei tuoi dati.'});
+  else if(ultimo){ const giorni=Math.floor((oggi-new Date(ultimo))/86400000); if(giorni>=30) out.push({tipo:'avviso', testo:`Backup vecchio di ${giorni} giorni. È consigliato crearne uno nuovo.`}); }
+  const ass = AppState.assenze || {};
+  Object.entries(ass).forEach(([nome,v])=>{
+    const spettanti=Number(v?.spettanti ?? v?.totale ?? 0), usati=Number(v?.usati ?? v?.utilizzati ?? 0);
+    if(spettanti>0 && usati/spettanti>=.8) out.push({tipo:'avviso', testo:`Saldo assenza quasi esaurito: ${nome}.`});
+  });
+  return out.slice(0,5);
+}
+
+function renderAvvisiApp(){
+  const host=el('appAlerts'); if(!host) return;
+  const avvisi=aggiornaAvvisiApp();
+  host.innerHTML='';
+  if(!avvisi.length){ host.hidden=true; return; }
+  host.hidden=false;
+  avvisi.forEach(a=>{
+    const d=document.createElement('div'); d.className=`app-alert-v20 alert-${a.tipo}`;
+    d.innerHTML=`<span>${a.tipo==='avviso'?'⚠':a.tipo==='errore'?'!':'i'}</span><p></p><button type="button" aria-label="Chiudi">×</button>`;
+    d.querySelector('p').textContent=a.testo; d.querySelector('button').onclick=()=>d.remove(); host.appendChild(d);
+  });
+}
