@@ -36,7 +36,9 @@ function aggiornaAnteprimaSequenzaSemplice(){
 
 function renderSequenza(){
   const data=el('campoSequenzaDataInizio');
-  if(data) data.value = giornoSelezionato || dataISO(new Date());
+  // La data di inizio della generazione è indipendente dal giorno selezionato
+  // nel calendario. Durante il render dei modelli non deve essere sovrascritta.
+  if(data && !data.value) data.value = dataISO(new Date());
   const lista = el('listaSequenza');
   if(!lista) return;
   lista.innerHTML = AppState.sequenzaTurni.map((passo, i) => {
