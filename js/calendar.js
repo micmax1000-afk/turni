@@ -434,6 +434,7 @@ function renderCalendario(){
         : etichetta || 'Libero';
 
     cella.className = classi;
+    cella.dataset.data = iso;
     cella.dataset.filtro = categoriaFiltroCalendario(t, categoria);
     cella.setAttribute('aria-label', `${g} ${NOMI_MESI[meseCorrente]} ${annoCorrente}: ${nomeCategoria}${orario ? ', ' + t.oraInizio + '–' + t.oraFine : ''}${haStraordinario ? ', straordinario' : ''}${haMissione ? ', missione' : ''}${haAssenza ? ', assenza' : ''}`);
     cella.title = `${g} ${NOMI_MESI[meseCorrente]} — ${nomeCategoria}${haStraordinario ? ' · Straordinario' : ''}${haMissione ? ' · Missione' : ''}`;
@@ -463,8 +464,7 @@ function selezionaGiorno(iso){
   giornoSelezionato = iso;
   // aggiorna solo le classi di selezione, senza ricostruire l'intera griglia
   document.querySelectorAll('#calendarioGriglia .giorno-cella').forEach(c => c.classList.remove('selezionata'));
-  const celle = document.querySelectorAll('#calendarioGriglia .giorno-cella:not(.vuota)');
-  const cellaTrovata = [...celle].find(c => c.querySelector('.giorno-numero').textContent === String(Number(iso.slice(8,10))));
+  const cellaTrovata = document.querySelector(`#calendarioGriglia .giorno-cella[data-data="${iso}"]`);
   if(cellaTrovata) cellaTrovata.classList.add('selezionata');
   aggiornaDettaglioGiorno();
 }

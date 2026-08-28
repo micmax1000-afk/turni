@@ -1298,3 +1298,21 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .tabella-head-v17 b{min-width:20px;text-align:center}
 .tabella-head-v17[aria-expanded="false"]{background:transparent}
 .tabella-head-v17[aria-expanded="true"]{background:rgba(37,99,235,.025)}
+
+
+/* V44.1 — selezione calendario più chiara e data dei riposi in grassetto */
+.giorno-cella.riposo-giorno .giorno-numero{font-weight:800!important;}
+.giorno-cella.selezionata{
+  background:#D9F0FF!important;
+  border-color:#2196F3!important;
+  box-shadow:0 0 0 3px rgba(33,150,243,.24),0 3px 10px rgba(33,150,243,.16);
+  transform:translateY(-1px);
+  z-index:3;
+}
+.giorno-cella.selezionata .giorno-numero{color:#0B4F8A!important;font-weight:800!important;}
+.giorno-cella.selezionata.sabato .giorno-numero,
+.giorno-cella.selezionata.festivo .giorno-numero{color:#0B4F8A!important;}
+.giorno-cella.selezionata .giorno-turno-badge{background:rgba(255,255,255,.88);color:var(--inchiostro);}
+[data-tema="scuro"] .giorno-cella.selezionata{background:#164B70!important;border-color:#60B8F2!important;box-shadow:0 0 0 3px rgba(96,184,242,.24),0 3px 10px rgba(0,0,0,.25);}
+[data-tema="scuro"] .giorno-cella.selezionata .giorno-numero{color:#E6F6FF!important;font-weight:800!important;}
+[data-tema="scuro"] .giorno-cella.selezionata .giorno-turno-badge{background:#202631;color:#E6F6FF;}
