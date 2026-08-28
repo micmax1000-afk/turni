@@ -169,39 +169,56 @@ function cancellaTurniMese(){
   );
 }
 
+function orariSemplici(){
+  const v = el('selettoreOrarioSemplice')?.value || '0814';
+  if(v === '0713') return {inizio:'07:00', fine:'13:00'};
+  if(v === '0814') return {inizio:'08:00', fine:'14:00'};
+  return null;
+}
+
+function passoPersonalizzatoConOrario(extra={}, orari=null){
+  const o = orari || orariSemplici() || {inizio:'08:00', fine:'14:00'};
+  return {tipo:'personalizzato', oraInizio:o.inizio, oraFine:o.fine, extra:{...extra}};
+}
+
 function applicaModelloTurnoInQuinta(){
   AppState.sequenzaTurni = [{tipo:'sera01'}, {tipo:'pomeriggio'}, {tipo:'mattina'}, {tipo:'notte01'}, {tipo:'riposo'}];
   salvaSequenzaStorage();
   renderSequenza();
 }
 
-function applicaModelloSettimanaCorta(){
-  const base = (oraInizio, oraFine, extra) => ({ tipo:'personalizzato', oraInizio, oraFine, extra: extra || {} });
-  const riposo = () => ({ tipo:'riposo' });
-  const rientro = { secondoAttivo:true, secondoOraInizio:'15:00', secondoOraFine:'18:00' };
-
+function applicaModelloTurnoInQuinta10(){
   AppState.sequenzaTurni = [
-    base('08:00','14:00'),               // lunedì
-    base('08:00','14:00', {...rientro}), // martedì — rientro pomeridiano 3h
-    base('08:00','14:00'),               // mercoledì
-    base('08:00','14:00', {...rientro}), // giovedì — rientro pomeridiano 3h
-    base('08:00','14:00'),               // venerdì
-    riposo(),                            // sabato
-    riposo()                             // domenica
+    {tipo:'sera01'}, {tipo:'pomeriggio'}, {tipo:'mattina'}, {tipo:'notte01'}, {tipo:'riposo'},
+    {tipo:'sera01'}, {tipo:'pomeriggio'}, {tipo:'mattina'}, {tipo:'mattina'}, {tipo:'riposo'}
   ];
   salvaSequenzaStorage();
   renderSequenza();
 }
 
-function applicaModelloSettimanaLunga(){
-  const base = (oraInizio, oraFine) => ({ tipo:'personalizzato', oraInizio, oraFine, extra:{} });
-  const riposo = () => ({ tipo:'riposo' });
+function applicaModelloSettimanaCorta(){
+  const orari = orariSemplici();
+  if(!orari){
+    mostraAvviso('Per la settimana corta scegli 07:00–13:00 o 08:00–14:00. Per un orario diverso usa le Opzioni avanzate.');
+    return;
+  }
+  const base = (extra={}) => passoPersonalizzatoConOrario(extra, orari);
+  const riposo = () => ({tipo:'riposo'});
+  const rientro = {secondoAttivo:true, secondoOraInizio:'15:00', secondoOraFine:'18:00'};
+  AppState.sequenzaTurni = [base(), base(rientro), base(), base(rientro), base(), riposo(), riposo()];
+  salvaSequenzaStorage();
+  renderSequenza();
+}
 
-  AppState.sequenzaTurni = [
-    base('08:00','14:00'), base('08:00','14:00'), base('08:00','14:00'),
-    base('08:00','14:00'), base('08:00','14:00'), base('08:00','14:00'), // lunedì-sabato
-    riposo()                                                              // domenica
-  ];
+function applicaModelloSettimanaLunga(){
+  const orari = orariSemplici();
+  if(!orari){
+    mostraAvviso('Per la settimana lunga scegli 07:00–13:00 o 08:00–14:00. Per un orario diverso usa le Opzioni avanzate.');
+    return;
+  }
+  const base = () => passoPersonalizzatoConOrario({}, orari);
+  const riposo = () => ({tipo:'riposo'});
+  AppState.sequenzaTurni = [base(),base(),base(),base(),base(),base(),riposo()];
   salvaSequenzaStorage();
   renderSequenza();
 }

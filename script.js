@@ -493,6 +493,11 @@ function inizializza(){
     const seq = el('sezioneSequenza');
     if(seq) seq.hidden = true;
   });
+  on('btnRitornaGeneratoreV44','click', () => {
+    const dettagli = el('sezioneSequenza')?.querySelector('.opzioni-avanzate-sequenza');
+    if(dettagli) dettagli.open = false;
+    el('sezioneSequenza')?.scrollIntoView({behavior:'smooth', block:'start'});
+  });
   el('btnAggiungiStepSequenza').addEventListener('click', () => {
     AppState.sequenzaTurni.push({ tipo:'riposo' });
     renderSequenza();
@@ -510,6 +515,7 @@ function inizializza(){
   on('btnApplicaModelloSemplice','click',()=>{
     const scelta=el('selettoreModelloSemplice')?.value;
     if(scelta==='quinta') el('btnModelloTurnoInQuinta')?.click();
+    else if(scelta==='quinta10') mostraConferma('Questo sostituirà la sequenza con il modello in quinta di 10 giorni. Continuare?', applicaModelloTurnoInQuinta10);
     else if(scelta==='corta') el('btnModelloSettimanaCorta')?.click();
     else if(scelta==='lunga') el('btnModelloSettimanaLunga')?.click();
     else {

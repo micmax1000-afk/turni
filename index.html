@@ -561,9 +561,17 @@
           <label class="campo-modale">🔄 Quale turnazione?
             <select id="selettoreModelloSemplice">
               <option value="quinta">Turno in quinta — Sera · Pomeriggio · Mattina · Notte · Riposo</option>
+              <option value="quinta10">Turno in quinta 10 giorni — Sera · Pomeriggio · Mattina · Notte · Riposo · Sera · Pomeriggio · Mattina · Mattina · Riposo</option>
               <option value="corta">Settimana corta — Lun–Ven 08:00–14:00</option>
               <option value="lunga">Settimana lunga — Lun–Sab 08:00–14:00</option>
               <option value="personalizzata">Personalizzata — la imposto io</option>
+            </select>
+          </label>
+          <label class="campo-modale">🕐 Fascia oraria
+            <select id="selettoreOrarioSemplice">
+              <option value="0713">07:00–13:00</option>
+              <option value="0814" selected>08:00–14:00</option>
+              <option value="personalizzato">Personalizzata</option>
             </select>
           </label>
           <button class="btn-secondario btn-modello-applica" id="btnApplicaModelloSemplice" type="button">✓ Applica modello</button>
@@ -615,6 +623,9 @@
           <button class="btn-secondario" id="btnAggiungiStepSequenza" type="button">＋ Aggiungi giorno</button>
         </div>
         <p class="sotto-titolo">Qui puoi personalizzare ogni passaggio, gli orari e le opzioni extra (rientro pomeridiano, straordinario programmato, missione, reperibilità, ecc.).</p>
+      </div>
+      <div class="azioni-avanzate-fondo">
+        <button type="button" class="btn-secondario" id="btnRitornaGeneratoreV44">← Torna al generatore</button>
       </div>
     </details>
   </section>

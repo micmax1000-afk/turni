@@ -1291,3 +1291,10 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .anteprima-turnazione-titolo{font-weight:800;margin-bottom:8px}.anteprima-turnazione-lista{display:flex;flex-wrap:wrap;gap:6px}.anteprima-passaggio{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:10px;background:var(--carta);border:1px solid var(--bordo);font-size:.84rem}.anteprima-passaggio>span{font-weight:800;opacity:.65}.anteprima-altro,.anteprima-vuota{font-size:.84rem;opacity:.7}
 .opzioni-avanzate-sequenza{margin-top:14px;border:1px solid var(--bordo);border-radius:14px;background:var(--carta);overflow:hidden}.opzioni-avanzate-sequenza>summary{cursor:pointer;padding:12px 14px;font-weight:800;list-style:none}.opzioni-avanzate-sequenza>summary::-webkit-details-marker{display:none}.opzioni-avanzate-sequenza>summary:after{content:'＋';float:right;opacity:.65}.opzioni-avanzate-sequenza[open]>summary:after{content:'−'}.opzioni-avanzate-corpo{padding:0 14px 14px}.modelli-nascosti{display:none}.riga-sequenza-semplice{padding:7px 0;border-bottom:1px solid var(--bordo)}.riga-sequenza-semplice select{min-height:42px;border-radius:10px}.riga-sequenza-orari-semplice{margin-left:38px}.riga-sequenza-orari-semplice input{min-height:40px;border-radius:10px}
 @media (min-width:700px){.generatore-azioni{grid-template-columns:1fr 1fr}.generatore-step{align-items:center}.btn-modello-applica{width:auto}.anteprima-turnazione-lista{gap:8px}}
+
+/* V44 — interfaccia generatore e tabelle */
+.azioni-avanzate-fondo{display:flex;justify-content:center;margin:18px 0 4px;padding-top:12px;border-top:1px solid var(--bordo)}
+#btnRitornaGeneratoreV44{min-height:44px;border-radius:12px;font-weight:700}
+.tabella-head-v17 b{min-width:20px;text-align:center}
+.tabella-head-v17[aria-expanded="false"]{background:transparent}
+.tabella-head-v17[aria-expanded="true"]{background:rgba(37,99,235,.025)}
