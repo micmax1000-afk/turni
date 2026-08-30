@@ -420,7 +420,7 @@ function inizializza(){
     if(!el('contenitoreCedolino').hidden) renderCedolino();
   });
   el('btnResetTabelle').addEventListener('click', () => {
-    AppState.tabelle = JSON.parse(JSON.stringify(TABELLE_PREDEFINITE));
+    AppState.tabelle = clonaTabelleConSoglie(TABELLE_PREDEFINITE);
     renderTabelle();
   });
 

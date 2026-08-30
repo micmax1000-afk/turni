@@ -2,6 +2,7 @@
 
 function renderTabelle(){
   const qualifica = AppState.anagrafica ? AppState.anagrafica.qualifica : 'Agente';
+  const regione = (AppState.anagrafica && AppState.anagrafica.regione) || 'Lombardia';
   const catRuolo = (MAPPA_GRADI[qualifica] || { cat:'truppa' }).cat;
   const NOMI_RUOLO = { truppa:'Agenti e Assistenti', sovr:'Sovrintendenti', isp:'Ispettori', funz:'Commissari/Funzionari' };
   const t = AppState.tabelle;
@@ -22,7 +23,31 @@ function renderTabelle(){
   const bodyInd = row('Turno notturno ordinario (€/h)',`indennitaTurnoNotturnoOraria`)+row('Presenza festiva/domenicale (€/turno)',`indennitaPresenzaFestivaTurno`)+row('Festività particolare (€/giorno)',`indennitaFestivitaParticolareGiorno`)+row('Compensazione riposo lavorato (€/giorno)',`indennitaCompensazioneRiposoLavorato`)+row('Ordine pubblico in sede (€/turno)',`indennitaOPInSede`)+row('Ordine pubblico fuori sede (€/turno)',`indennitaOPFuoriSede`)+row('Riduzione OP senza pernottamento (%)',`riduzioneOPSenzaPernottamento`,'1')+row('Servizio esterno (€/turno)',`indennitaServizioEsternoTurno`)+row('Controllo territorio serale (€/giorno)',`indennitaControlloTerritorioSeraleFlat`)+row('Controllo territorio notturno (€/giorno)',`indennitaControlloTerritorioNotturnoFlat`)+row('Reperibilità (€/turno)',`reperibilitaGiornaliera`)+row('Cambio turno (€/occorrenza)',`indennitaCambioTurno`)+row('Produttività collettiva (€/giorno)',`indennitaProduttivitaCollettiva`)+row('Missione — piena 4-8h (€/h)',`indennitaTrasfertaOraria`,'0.001')+row('Missione — ridotta oltre 8h (€/h)',`indennitaTrasfertaOrariaRidotta`,'0.001')+row('Quota sindacale (€/mese)',`sindacatoMensile`);
   const bodyFisc = row('Aliquota previdenziale (%)',`aliquotaPrevidenziale`)+row('No-tax area annua (€)',`noTaxAreaAnnua`,'1')+row('Detrazione lavoro dipendente (€/mese)',`detrazioneLavoroMensile`)+row('Detrazione coniuge (€/anno)',`detrazioneConiugeACaricoAnnua`)+row('Detrazione figlio over 21 (€/anno)',`detrazionePerFiglioOver21Annua`)+row('Trattamento integrativo (€/mese)',`trattamentoIntegrativoMensile`);
   const bodyBuono=row('Valore buono pasto (€)',`buonoPastoValore`);
-  el('corpoTabelle').innerHTML = `<div class="tabelle-v17"><div class="tabelle-hero-v17"><div><span class="tabella-eyebrow">CENTRO PARAMETRI</span><h3>Tabelle per ${esc(qualifica)}</h3><p>Modifica solo i valori che vuoi personalizzare. Il cedolino utilizza questi parametri.</p></div><div class="tabella-hero-badge"><strong id="tabellaCountModificati">0</strong><small>modificati</small></div></div><div class="tabelle-toolbar-v17"><label class="tabella-search-v17"><span>⌕</span><input id="ricercaTabelle" type="search" placeholder="Cerca una voce…" autocomplete="off"></label><div class="tabella-filtri-v17" role="group" aria-label="Filtra tabelle"><button type="button" class="tabella-filtro-v17 attivo" data-table-filter="tutte">Tutte</button><button type="button" class="tabella-filtro-v17" data-table-filter="modificati">Modificate</button><button type="button" class="tabella-filtro-v17" data-table-filter="predefiniti">Predefinite</button></div></div><div class="tabella-notice-v17"><span>ⓘ</span><p><strong>Attenzione ai valori economici.</strong> I parametri modificati possono cambiare il netto stimato. Verifica sempre il cedolino ufficiale prima di usare i risultati.</p></div>${section('fisse','Voci fisse','💶','Stipendio e indennità pensionabile',bodyFisse)}${section('straordinario','Straordinario','⏱️','Tariffe orarie in vigore',bodyStra)}${section('straordinario27','Straordinario 2027','📅','Valori proiettati, non ancora in vigore',bodyStra27,'proiezione')}${section('assegno','Assegno di funzione','🎖️',`${NOMI_RUOLO[catRuolo]} — soglie di servizio`,bodyAssegno,catRuolo==='funz'?'attenzione':'')}${section('indennita','Indennità e trasferte','🚓','Servizi, missioni e accessorie',bodyInd)}${section('fiscale','Fiscale e previdenziale','🧾','Parametri utilizzati per la stima',bodyFisc)}${section('buono','Buono pasto','🍽️','Valore informativo',bodyBuono)}<div class="tabelle-v17-footer"><button type="button" class="btn-secondario" id="btnResetTabelleV17">↺ Ripristina tutto</button><span>Le modifiche restano in memoria solo dopo <strong>Salva</strong>.</span></div></div>`;
+
+  // IRPEF nazionale — 3 scaglioni. L'ultimo non ha una soglia "fino a" (si applica oltre la soglia precedente).
+  const irpefDef = val(defs,'irpefScaglioni') || [];
+  const bodyIrpef = irpefDef.map((sc,i,arr) => {
+    const isLast = i === arr.length - 1;
+    return (isLast ? '' : row(`Scaglione ${i+1} — fino a (€)`, `irpefScaglioni.${i}.fino`, '1')) +
+      row(`Scaglione ${i+1} — aliquota (%)${isLast ? ' (oltre l\u2019ultima soglia)' : ''}`, `irpefScaglioni.${i}.aliquota`, '0.1');
+  }).join('');
+
+  // Addizionale regionale — mostriamo solo la regione impostata in Anagrafica, come per stipendio/qualifica.
+  const datiRegione = val(defs, `regioniAddizionale.${regione}`);
+  let bodyRegionale = '<p class="sotto-titolo" style="padding:2px 0 8px;">Imposta la regione in Anagrafica per modificarne l\u2019addizionale.</p>';
+  if(datiRegione){
+    if(datiRegione.tipo === 'unica'){
+      bodyRegionale = row('Aliquota unica (%)', `regioniAddizionale.${regione}.valore`, '0.01');
+    } else if(datiRegione.tipo === 'scaglioni'){
+      bodyRegionale = datiRegione.scaglioni.map((sc,i,arr) => {
+        const isLast = i === arr.length - 1;
+        return (isLast ? '' : row(`Scaglione ${i+1} — fino a (€)`, `regioniAddizionale.${regione}.scaglioni.${i}.fino`, '1')) +
+          row(`Scaglione ${i+1} — aliquota (%)${isLast ? ' (oltre l\u2019ultima soglia)' : ''}`, `regioniAddizionale.${regione}.scaglioni.${i}.aliquota`, '0.01');
+      }).join('');
+    }
+  }
+
+  el('corpoTabelle').innerHTML = `<div class="tabelle-v17"><div class="tabelle-hero-v17"><div><span class="tabella-eyebrow">CENTRO PARAMETRI</span><h3>Tabelle per ${esc(qualifica)}</h3><p>Modifica solo i valori che vuoi personalizzare. Il cedolino utilizza questi parametri.</p></div><div class="tabella-hero-badge"><strong id="tabellaCountModificati">0</strong><small>modificati</small></div></div><div class="tabelle-toolbar-v17"><label class="tabella-search-v17"><span>⌕</span><input id="ricercaTabelle" type="search" placeholder="Cerca una voce…" autocomplete="off"></label><div class="tabella-filtri-v17" role="group" aria-label="Filtra tabelle"><button type="button" class="tabella-filtro-v17 attivo" data-table-filter="tutte">Tutte</button><button type="button" class="tabella-filtro-v17" data-table-filter="modificati">Modificate</button><button type="button" class="tabella-filtro-v17" data-table-filter="predefiniti">Predefinite</button></div></div><div class="tabella-notice-v17"><span>ⓘ</span><p><strong>Attenzione ai valori economici.</strong> I parametri modificati possono cambiare il netto stimato. Verifica sempre il cedolino ufficiale prima di usare i risultati.</p></div>${section('fisse','Voci fisse','💶','Stipendio e indennità pensionabile',bodyFisse)}${section('straordinario','Straordinario','⏱️','Tariffe orarie in vigore',bodyStra)}${section('straordinario27','Straordinario 2027','📅','Valori proiettati, non ancora in vigore',bodyStra27,'proiezione')}${section('assegno','Assegno di funzione','🎖️',`${NOMI_RUOLO[catRuolo]} — soglie di servizio`,bodyAssegno,catRuolo==='funz'?'attenzione':'')}${section('indennita','Indennità e trasferte','🚓','Servizi, missioni e accessorie',bodyInd)}${section('fiscale','Fiscale e previdenziale','🧾','Parametri utilizzati per la stima',bodyFisc)}${section('irpef','IRPEF nazionale','🧮','Scaglioni e aliquote — Legge di Bilancio',bodyIrpef)}${section('regionale','Addizionale regionale','🗺️',`${esc(regione)} — aggiorna quando cambia la delibera regionale`,bodyRegionale)}${section('buono','Buono pasto','🍽️','Valore informativo',bodyBuono)}<div class="tabelle-v17-footer"><button type="button" class="btn-secondario" id="btnResetTabelleV17">↺ Ripristina tutto</button><span>Le modifiche restano in memoria solo dopo <strong>Salva</strong>.</span></div></div>`;
 
   const updateStatus=()=>{
     let changed=0;
@@ -36,7 +61,7 @@ function renderTabelle(){
   el('corpoTabelle').querySelectorAll('[data-reset-table]').forEach(b=>b.addEventListener('click',()=>{const d=val(defs,b.dataset.resetTable);if(d!==undefined){const i=el('corpoTabelle').querySelector(`input[data-t="${CSS.escape(b.dataset.resetTable)}"]`);if(i){i.value=d;updateStatus();}}}));
   el('corpoTabelle').querySelector('#ricercaTabelle').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();el('corpoTabelle').querySelectorAll('[data-table-row]').forEach(r=>r.classList.toggle('tabella-nascosta',q && !r.dataset.label.toLowerCase().includes(q)));});
   el('corpoTabelle').querySelectorAll('[data-table-filter]').forEach(b=>b.addEventListener('click',()=>{el('corpoTabelle').querySelectorAll('[data-table-filter]').forEach(x=>x.classList.remove('attivo'));b.classList.add('attivo');const f=b.dataset.tableFilter;el('corpoTabelle').querySelectorAll('[data-table-row]').forEach(r=>{const hide=f!=='tutte' && r.dataset.state!==(f==='modificati'?'modificato':'predefinito');r.classList.toggle('tabella-nascosta',hide);});}));
-  el('btnResetTabelleV17').addEventListener('click',()=>{AppState.tabelle=JSON.parse(JSON.stringify(defs));renderTabelle();});
+  el('btnResetTabelleV17').addEventListener('click',()=>{AppState.tabelle=clonaTabelleConSoglie(defs);renderTabelle();});
   updateStatus();
 }
 

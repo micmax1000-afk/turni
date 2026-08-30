@@ -107,7 +107,7 @@ function salvaSequenzaStorage(){ TurniPSStorage.setItem(CHIAVE_SEQUENZA, JSON.st
 function caricaTabelle(){
   try{
     const salvate = JSON.parse(TurniPSStorage.getItem(CHIAVE_TABELLE));
-    if(!salvate) return JSON.parse(JSON.stringify(TABELLE_PREDEFINITE));
+    if(!salvate) return clonaTabelleConSoglie(TABELLE_PREDEFINITE);
     // Migrazione: le vecchie AppState.tabelle salvate avevano lo straordinario a 4 gruppi
     // (es. "Agenti/Assistenti"), incompatibile con la nuova struttura per qualifica.
     if(salvate.straordinarioOrario && !salvate.straordinarioOrario['Agente']){
@@ -118,8 +118,8 @@ function caricaTabelle(){
     if(salvate.assegnoFunzioneAnnuo && !salvate.assegnoFunzioneAnnuo.truppa){
       delete salvate.assegnoFunzioneAnnuo;
     }
-    return { ...JSON.parse(JSON.stringify(TABELLE_PREDEFINITE)), ...salvate };
-  }catch{ return JSON.parse(JSON.stringify(TABELLE_PREDEFINITE)); }
+    return ripristinaSoglieInfinite({ ...clonaTabelleConSoglie(TABELLE_PREDEFINITE), ...salvate });
+  }catch{ return clonaTabelleConSoglie(TABELLE_PREDEFINITE); }
 }
 
 function salvaTabelleStorage(){ TurniPSStorage.setItem(CHIAVE_TABELLE, JSON.stringify(AppState.tabelle)); }

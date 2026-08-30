@@ -153,5 +153,30 @@ window.TurniPSData.TABELLE_PREDEFINITE = {
   sogliaTrattamentoIntegrativoAnnua: 28000,
   sogliaDetassazioneAccessoriAnnua: 800,
   aliquotaDetassazioneAccessori: 15,
-  buonoPastoValore: 7.00
+  buonoPastoValore: 7.00,
+  // Addizionale regionale IRPEF 2026 — aliquote per regione (fonte: delibere regionali).
+  // Spostata qui da js/calendar.js per renderla modificabile da Impostazioni → Tabelle ufficiali.
+  regioniAddizionale: {
+    "Abruzzo": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.67}, {fino:50000.0, aliquota:2.87}, {fino:Infinity, aliquota:3.33}] },
+    "Basilicata": { tipo:'unica', valore:1.23 },
+    "Calabria": { tipo:'unica', valore:1.73 },
+    "Campania": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:2.96}, {fino:50000.0, aliquota:3.2}, {fino:Infinity, aliquota:3.33}] },
+    "Emilia-Romagna": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.33}, {fino:28000.0, aliquota:1.93}, {fino:50000.0, aliquota:2.78}, {fino:Infinity, aliquota:3.33}] },
+    "Friuli Venezia Giulia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:0.7}, {fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.23}] },
+    "Lazio": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:3.33}, {fino:50000.0, aliquota:3.33}, {fino:Infinity, aliquota:3.33}] },
+    "Liguria": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:3.18}, {fino:Infinity, aliquota:3.23}] },
+    "Lombardia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.58}, {fino:50000.0, aliquota:1.72}, {fino:Infinity, aliquota:1.73}] },
+    "Marche": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.53}, {fino:50000.0, aliquota:1.7}, {fino:Infinity, aliquota:1.73}] },
+    "Molise": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:1.93}, {fino:50000.0, aliquota:3.33}, {fino:Infinity, aliquota:3.33}] },
+    "Piemonte": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.62}, {fino:28000.0, aliquota:2.68}, {fino:50000.0, aliquota:3.31}, {fino:Infinity, aliquota:3.33}] },
+    "Provincia di Bolzano": { tipo:'scaglioni', scaglioni:[{fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.73}] },
+    "Provincia di Trento": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.23}, {fino:28000.0, aliquota:1.23}, {fino:50000.0, aliquota:1.23}, {fino:Infinity, aliquota:1.73}] },
+    "Puglia": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.33}, {fino:28000.0, aliquota:1.43}, {fino:50000.0, aliquota:1.63}, {fino:Infinity, aliquota:1.85}] },
+    "Sardegna": { tipo:'unica', valore:1.23 },
+    "Sicilia": { tipo:'unica', valore:1.23 },
+    "Toscana": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.42}, {fino:28000.0, aliquota:1.43}, {fino:50000.0, aliquota:3.32}, {fino:Infinity, aliquota:3.33}] },
+    "Umbria": { tipo:'scaglioni', scaglioni:[{fino:15000.0, aliquota:1.73}, {fino:28000.0, aliquota:3.02}, {fino:50000.0, aliquota:3.12}, {fino:Infinity, aliquota:3.33}] },
+    "Valle d'Aosta": { tipo:'unica', valore:1.23 },
+    "Veneto": { tipo:'unica', valore:1.23 }
+  }
 };
