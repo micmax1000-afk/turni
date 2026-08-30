@@ -302,6 +302,24 @@ function impostaFiltroCalendario(filtro){
   });
 }
 
+
+function aggiornaRiepilogoTurniV45(){
+  const mese=el('riepilogoTurniV45Mese');
+  if(!mese) return;
+  mese.textContent=`${NOMI_MESI[meseCorrente]} ${annoCorrente}`;
+  let lavoro=0,riposi=0,assenze=0,extra=0;
+  const giorniNelMese=new Date(annoCorrente,meseCorrente+1,0).getDate();
+  for(let g=1;g<=giorniNelMese;g++){
+    const iso=dataISO(new Date(annoCorrente,meseCorrente,g)), t=AppState.turni[iso];
+    if(!t) continue;
+    if(t.assenzaTipo){assenze++;continue}
+    if(t.riposo){riposi++;continue}
+    if(t.oraInizio&&t.oraFine) lavoro++;
+    if(t.missione||t.servizioEsterno||t.reperibilita||t.ordinePubblico||t.controlloTerritorio||t.buonoPasto||t.aggiornamentoProfessionale||t.addestramentoTiro||t.straordinarioPrimaInizio||t.straordinarioDopoInizio||t.secondoAttivo) extra++;
+  }
+  el('v45RtLavoro').textContent=lavoro; el('v45RtRiposi').textContent=riposi; el('v45RtAssenze').textContent=assenze; el('v45RtExtra').textContent=extra;
+}
+
 function renderCalendario(){
   el('etichettaMese').textContent = `${NOMI_MESI[meseCorrente]} ${annoCorrente}`;
   el('campoConguagliMese').value = AppState.conguagliPerMese[chiaveMese(annoCorrente, meseCorrente)] || 0;
@@ -456,6 +474,7 @@ function renderCalendario(){
   impostaFiltroCalendario(filtroCalendario);
   aggiornaDettaglioGiorno();
   aggiornaRiepilogoMensile();
+  aggiornaRiepilogoTurniV45();
   if(typeof aggiornaDashboard === 'function') aggiornaDashboard();
   if(typeof aggiornaRiepilogoVisualeMese === 'function') aggiornaRiepilogoVisualeMese();
 }
@@ -669,3 +688,55 @@ function inizializzaFiltriCalendario(){
 
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inizializzaFiltriCalendario);
 else inizializzaFiltriCalendario();
+
+/* V46_TOTAL_DAY_FIX
+   Regola ufficiale:
+   - ore lavoro = sole ore ordinarie
+   - straordinario = ore aggiuntive
+   - totale giorno = ore lavoro + straordinario
+   Esempio: 6:00 + 3:00 = 9:00.
+   Le durate attraversando la mezzanotte vengono normalizzate.
+*/
+(function () {
+  function toMinutes(v) {
+    if (typeof v === "number" && isFinite(v)) return Math.round(v * 60);
+    const s = String(v == null ? "" : v).trim().replace(",", ".");
+    if (!s) return 0;
+    const hm = s.match(/^(\d{1,3})\s*[:.]\s*(\d{1,2})$/);
+    if (hm) return Number(hm[1]) * 60 + Number(hm[2]);
+    const n = Number(s);
+    return isFinite(n) ? Math.round(n * 60) : 0;
+  }
+
+  function fmt(m) {
+    m = Math.max(0, Math.round(m || 0));
+    return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0");
+  }
+
+  window.calcolaTotaleGiornoV46 = function (oreLavoro, straordinario) {
+    return fmt(toMinutes(oreLavoro) + toMinutes(straordinario));
+  };
+
+  window.calcolaDurataTurnoV46 = function (inizio, fine) {
+    let d = toMinutes(fine) - toMinutes(inizio);
+    if (d < 0) d += 1440;
+    return fmt(d);
+  };
+
+  window.aggiornaTotaleGiornoV46 = function (root) {
+    root = root || document;
+    const ordinary = root.querySelector(
+      "#oreLavoro,#ore-lavoro,[name='oreLavoro'],[name='ore_lavoro'],[data-field='oreLavoro']"
+    );
+    const overtime = root.querySelector(
+      "#straordinario,#oreStraordinario,[name='straordinario'],[name='oreStraordinario'],[data-field='straordinario']"
+    );
+    const total = root.querySelector(
+      "#totaleGiorno,#totale-giorno,[name='totaleGiorno'],[data-field='totaleGiorno']"
+    );
+    if (!ordinary || !overtime || !total) return;
+    const value = window.calcolaTotaleGiornoV46(ordinary.value, overtime.value);
+    if ("value" in total) total.value = value;
+    total.textContent = value;
+  };
+})();

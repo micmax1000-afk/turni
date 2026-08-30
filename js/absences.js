@@ -265,7 +265,7 @@ function renderAssenze(){
     const icona = eL104 ? '♿' : eCongedoOrdinario ? '🌴' : eRiposoCompensativo ? '♻️' : eRecuperoRiposo || eRecuperoFestivo ? '🔄' : unitaEffettiva === 'h' ? '⏱️' : '📅';
     const valoreVisuale = valoreEffettivo || 0;
     return `
-    <article class="card-assenza ${statoSaldo}" data-id="${a.id}">
+    <article class="card-assenza ${statoSaldo} card-assenza-chiusa" data-id="${a.id}">
       <div class="card-assenza-head">
         <div class="card-assenza-title">
           <span class="card-assenza-icon" aria-hidden="true">${icona}</span>
@@ -274,6 +274,10 @@ function renderAssenze(){
         <span class="card-assenza-status">${rimangono < 0 ? '⚠ Esaurito' : rimangono === 0 ? '0 disponibili' : percentuale >= 80 ? 'Quasi esaurito' : 'Disponibile'}</span>
       </div>
       ${a.personalizzata ? `<input class="card-assenza-name" type="text" data-campo="nome" value="${a.nome}">` : ''}
+      <div class="card-assenza-compact" role="button" tabindex="0" aria-label="Apri dettagli e modifica">
+        <div><span>Residuo</span><strong>${rimangono}</strong><small>${unitaEffettiva}</small></div>
+        <span class="card-assenza-apri">Tocca per modificare <span aria-hidden="true">⌄</span></span>
+      </div>
       <div class="card-assenza-main">
         <div class="saldo-box"><span>Disponibili</span><strong>${rimangono}</strong><small>${unitaEffettiva}</small></div>
         <div class="saldo-box"><span>Utilizzati</span><strong>${usate}</strong><small>${unitaEffettiva}</small></div>
@@ -371,3 +375,24 @@ const ASSENZE_PREDEFINITE = [
   { nome:'Permesso breve', valore:54, unita:'h' },
   { nome:'Permesso sindacale', valore:36, unita:'h' }
 ];
+
+
+function inizializzaCardAssenzeV45(){
+  document.querySelectorAll('#corpoAssenze .card-assenza').forEach(card=>{
+    const trigger=card.querySelector('.card-assenza-compact');
+    if(!trigger || trigger.dataset.v45Bound) return;
+    trigger.dataset.v45Bound='1';
+    const toggle=()=>{
+      const aperta=card.classList.toggle('card-assenza-aperta');
+      card.classList.toggle('card-assenza-chiusa',!aperta);
+      trigger.setAttribute('aria-expanded',aperta?'true':'false');
+    };
+    trigger.addEventListener('click',toggle);
+    trigger.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
+}
+const _renderAssenzeV45=renderAssenze;
+renderAssenze=function(){
+  _renderAssenzeV45();
+  inizializzaCardAssenzeV45();
+};
