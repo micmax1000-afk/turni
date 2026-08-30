@@ -46,17 +46,40 @@
       <button class="etichetta-mese-btn" id="etichettaMese" type="button" title="Vai a un mese specifico">—</button>
       <button class="btn-freccia" id="btnMeseSucc" type="button" aria-label="Mese successivo">›</button>
     </div>
+    <div id="prossimoTurnoWidget" class="prossimo-turno-widget" hidden>
+      <span class="prossimo-turno-eyebrow">⏭️ Prossimo turno</span>
+      <div class="prossimo-turno-corpo">
+        <span class="prossimo-turno-icona" id="prossimoTurnoIcona">☀️</span>
+        <div class="prossimo-turno-testo">
+          <strong id="prossimoTurnoLabel">—</strong>
+          <span id="prossimoTurnoOrario">—</span>
+        </div>
+        <span class="prossimo-turno-quando" id="prossimoTurnoQuando">—</span>
+      </div>
+    </div>
     <div class="calendario-giorni-settimana">
       <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
     </div>
     <div class="calendario-griglia" id="calendarioGriglia"></div>
     <div id="riepilogoTurniV45" class="riepilogo-turni-v45" aria-live="polite">
-      <div class="riepilogo-turni-v45-titolo"><strong>Riepilogo mese</strong><span id="riepilogoTurniV45Mese">—</span></div>
+      <button type="button" class="riepilogo-turni-v45-titolo" id="riepilogoTurniV45Toggle" aria-expanded="false">
+        <span><strong>Riepilogo mese</strong> <span id="riepilogoTurniV45Mese">—</span></span>
+        <span class="riepilogo-turni-v45-freccia" aria-hidden="true">▾</span>
+      </button>
       <div class="riepilogo-turni-v45-grid">
-        <div><strong id="v45RtLavoro">0</strong><span>giorni lavoro</span></div>
+        <div><strong id="v45RtLavoro">0</strong><span>turni</span></div>
         <div><strong id="v45RtRiposi">0</strong><span>riposi</span></div>
         <div><strong id="v45RtAssenze">0</strong><span>assenze</span></div>
-        <div><strong id="v45RtExtra">0</strong><span>extra</span></div>
+        <div><strong id="v45RtStraordinario">0:00</strong><span>straordinario</span></div>
+      </div>
+      <div id="riepilogoTurniV45Espanso" class="riepilogo-turni-v45-espanso" hidden>
+        <div><span>🛡️ Missioni</span><strong id="v45RtMissioni">0</strong></div>
+        <div><span>🚓 Servizio esterno</span><strong id="v45RtServizioEsterno">0</strong></div>
+        <div><span>📞 Reperibilità</span><strong id="v45RtReperibilita">0</strong></div>
+        <div><span>🛡 Ordine pubblico</span><strong id="v45RtOrdinePubblico">0</strong></div>
+        <div><span>🍽️ Buoni pasto</span><strong id="v45RtBuoniPasto">0</strong></div>
+        <div><span>🔄 Ore compensate</span><strong id="v45RtOreCompensate">0:00</strong></div>
+        <div><span>⚡ Extra</span><strong id="v45RtExtra">0</strong></div>
       </div>
     </div>
     <div class="legenda-colori" id="legendaColoriTurni">

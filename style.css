@@ -1320,7 +1320,7 @@ h3{ font-family: var(--font-display); font-weight:600; }
 
 /* V46 — miglioramenti Turni e Assenze */
 .riepilogo-turni-v45{margin:10px 0 12px;padding:12px 13px;border:1px solid var(--bordo,#d9dee8);border-radius:15px;background:var(--sfondo-card,#fff)}
-.riepilogo-turni-v45-titolo{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;margin-bottom:8px}.riepilogo-turni-v45-titolo span{opacity:.65}
+.riepilogo-turni-v45-titolo{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.82rem;margin-bottom:8px;width:100%;border:0;background:transparent;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left}.riepilogo-turni-v45-titolo span{opacity:.65}.riepilogo-turni-v45-freccia{opacity:.5!important;transition:transform .15s ease;flex-shrink:0}.riepilogo-turni-v45-titolo.aperto .riepilogo-turni-v45-freccia{transform:rotate(180deg)}
 .riepilogo-turni-v45-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.riepilogo-turni-v45-grid div{padding:8px 5px;text-align:center;border-radius:11px;background:var(--sfondo-secondario,#f4f6fa)}.riepilogo-turni-v45-grid strong{display:block;font-size:1.1rem}.riepilogo-turni-v45-grid span{display:block;font-size:.62rem;opacity:.65}
 .card-assenza-compact{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 11px;border-radius:13px;background:var(--sfondo-secondario,#f4f6fa);cursor:pointer;outline:none}.card-assenza-compact:focus-visible{box-shadow:0 0 0 3px rgba(0,130,210,.22)}
 .card-assenza-compact>div{display:flex;align-items:baseline;gap:5px}.card-assenza-compact span{font-size:.68rem;opacity:.68}.card-assenza-compact strong{font-size:1.35rem;font-weight:900}.card-assenza-compact small{font-size:.68rem;opacity:.65}.card-assenza-apri{font-weight:800;font-size:.7rem;white-space:nowrap}.card-assenza-aperta .card-assenza-apri span{display:inline-block;transform:rotate(180deg)}
@@ -1343,3 +1343,19 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .pagina-offline-v23-box h2{margin:0;font-size:.8rem}
 .pagina-offline-v23-box p{margin:2px 0 0;font-size:.68rem;line-height:1.35;color:var(--testo-tenue)}
 .pagina-offline-v23-icona{font-size:1.3rem;flex-shrink:0}
+
+/* V47 — Prossimo turno */
+.prossimo-turno-widget{margin:0 0 10px;padding:10px 13px;border:1px solid var(--bordo,#d9dee8);border-radius:15px;background:linear-gradient(135deg,var(--sfondo-secondario,#f4f6fa),var(--sfondo-card,#fff))}
+.prossimo-turno-eyebrow{display:block;font-size:.66rem;font-weight:700;opacity:.6;margin-bottom:4px}
+.prossimo-turno-corpo{display:flex;align-items:center;gap:10px}
+.prossimo-turno-icona{font-size:1.6rem;flex-shrink:0}
+.prossimo-turno-testo{display:flex;flex-direction:column;flex:1;min-width:0}
+.prossimo-turno-testo strong{font-size:.88rem}
+.prossimo-turno-testo span{font-size:.72rem;opacity:.7}
+.prossimo-turno-quando{font-size:.68rem;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--carta,#fff);border:1px solid var(--bordo,#d9dee8);white-space:nowrap;flex-shrink:0}
+
+/* V47 — Riepilogo mese espanso */
+.riepilogo-turni-v45-espanso{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bordo,#d9dee8)}
+.riepilogo-turni-v45-espanso>div{display:flex;justify-content:space-between;font-size:.7rem}
+.riepilogo-turni-v45-espanso strong{font-weight:700}
+.riepilogo-turni-v45-espanso span{opacity:.65}

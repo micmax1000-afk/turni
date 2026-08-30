@@ -317,7 +317,58 @@ function aggiornaRiepilogoTurniV45(){
     if(t.oraInizio&&t.oraFine) lavoro++;
     if(t.missione||t.servizioEsterno||t.reperibilita||t.ordinePubblico||t.controlloTerritorio||t.buonoPasto||t.aggiornamentoProfessionale||t.addestramentoTiro||t.straordinarioPrimaInizio||t.straordinarioDopoInizio||t.secondoAttivo) extra++;
   }
-  el('v45RtLavoro').textContent=lavoro; el('v45RtRiposi').textContent=riposi; el('v45RtAssenze').textContent=assenze; el('v45RtExtra').textContent=extra;
+  el('v45RtLavoro').textContent=lavoro; el('v45RtRiposi').textContent=riposi; el('v45RtAssenze').textContent=assenze;
+  const elExtra=el('v45RtExtra'); if(elExtra) elExtra.textContent=extra;
+
+  // Dati aggiuntivi per lo straordinario totale e il pannello espanso (calcolati una sola volta, riutilizzando la stessa fonte del cedolino)
+  const r = calcolaRiepilogoOreMese(annoCorrente, meseCorrente);
+  const straordinarioTotale = (r.tot.strDiurno||0) + (r.tot.strNotturno||0) + (r.tot.strFestivo||0) + (r.tot.strNotturnoFestivo||0);
+  const elStr=el('v45RtStraordinario'); if(elStr) elStr.textContent=formatOreMinuti(straordinarioTotale);
+  const setTxt=(id,val)=>{ const n=el(id); if(n) n.textContent=val; };
+  setTxt('v45RtMissioni', r.missioni);
+  setTxt('v45RtServizioEsterno', r.servizioEsterno);
+  setTxt('v45RtReperibilita', r.reperibilita);
+  setTxt('v45RtOrdinePubblico', r.ordinePubblico);
+  setTxt('v45RtBuoniPasto', r.buoniPasto);
+  setTxt('v45RtOreCompensate', formatOreMinuti(r.oreCompensateTotale));
+}
+
+function inizializzaToggleRiepilogoV45(){
+  const toggle = el('riepilogoTurniV45Toggle');
+  const pannello = el('riepilogoTurniV45Espanso');
+  if(!toggle || !pannello) return;
+  toggle.addEventListener('click', () => {
+    const aperto = !pannello.hidden;
+    pannello.hidden = aperto;
+    toggle.setAttribute('aria-expanded', aperto ? 'false' : 'true');
+    toggle.classList.toggle('aperto', !aperto);
+  });
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inizializzaToggleRiepilogoV45);
+else inizializzaToggleRiepilogoV45();
+
+function aggiornaProssimoTurno(){
+  const widget = el('prossimoTurnoWidget');
+  if(!widget) return;
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const isoOggi = dataISO(oggi);
+  // Cerchiamo, tra tutti i turni salvati, il primo giorno di lavoro effettivo (oraInizio/oraFine) da oggi in avanti.
+  const chiaviFuture = Object.keys(AppState.turni)
+    .filter(iso => iso >= isoOggi && AppState.turni[iso] && AppState.turni[iso].oraInizio && AppState.turni[iso].oraFine && !AppState.turni[iso].riposo && !AppState.turni[iso].assenzaTipo)
+    .sort();
+  if(!chiaviFuture.length){ widget.hidden = true; return; }
+  const iso = chiaviFuture[0];
+  const t = AppState.turni[iso];
+  const categoria = categoriaTurno(t.oraInizio, t.oraFine, t.data);
+  const d = new Date(iso + 'T00:00:00');
+  const diffGiorni = Math.round((d - oggi) / 86400000);
+  const quando = diffGiorni === 0 ? 'oggi' : diffGiorni === 1 ? 'domani' : `tra ${diffGiorni} giorni`;
+  const nomeCategoria = categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'sera' ? 'Sera' : 'Mattina';
+  el('prossimoTurnoIcona').textContent = ICONA_CATEGORIA[categoria] || '☀️';
+  el('prossimoTurnoLabel').textContent = `${nomeCategoria} — ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  el('prossimoTurnoOrario').textContent = `${t.oraInizio} → ${t.oraFine}`;
+  el('prossimoTurnoQuando').textContent = quando;
+  widget.hidden = false;
 }
 
 function renderCalendario(){
@@ -475,6 +526,7 @@ function renderCalendario(){
   aggiornaDettaglioGiorno();
   aggiornaRiepilogoMensile();
   aggiornaRiepilogoTurniV45();
+  aggiornaProssimoTurno();
   if(typeof aggiornaDashboard === 'function') aggiornaDashboard();
   if(typeof aggiornaRiepilogoVisualeMese === 'function') aggiornaRiepilogoVisualeMese();
 }
@@ -547,7 +599,7 @@ function aggiornaDettaglioGiorno(){
     const nome = voceAssenza ? voceAssenza.nome : 'Assenza';
     corpo.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-assenza">
-        <div class="dettaglio-hero-badge">A</div>
+        <div class="dettaglio-hero-badge">${ICONA_CATEGORIA.assenza}</div>
         <div><strong>${escapeHtml(nome)}</strong><span>Giornata registrata come assenza</span></div>
       </div>
       <div class="dettaglio-indicatori">
@@ -558,7 +610,7 @@ function aggiornaDettaglioGiorno(){
   } else if(t.riposo){
     corpo.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-riposo">
-        <div class="dettaglio-hero-badge">R</div>
+        <div class="dettaglio-hero-badge">${ICONA_CATEGORIA.riposo}</div>
         <div><strong>Riposo</strong><span>Giornata senza turno programmato</span></div>
       </div>
       <div class="dettaglio-indicatori">
@@ -589,7 +641,7 @@ function aggiornaDettaglioGiorno(){
     if(t.reperibilita) badges.push('<span class="dettaglio-pill pill-reperibilita">★ Reperibilità</span>');
     corpo.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-${escapeHtml(categoria || 'turno')}">
-        <div class="dettaglio-hero-badge">${escapeHtml(etichetta)}</div>
+        <div class="dettaglio-hero-badge">${ICONA_CATEGORIA[categoria] || escapeHtml(etichetta)}</div>
         <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(c.oreTotali)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
       </div>
       ${badges.length ? `<div class="dettaglio-pills">${badges.join('')}</div>` : ''}
@@ -655,6 +707,7 @@ const MODELLI_TURNO = {
 
 const INIZIALE_CATEGORIA = { mattina:'Mattina', pomeriggio:'Pomeriggio', sera:'Sera', notte:'Notte', riposo:'Riposo' };
 const CODICE_CATEGORIA = { mattina:'M', pomeriggio:'P', sera:'S', notte:'N', riposo:'R' };
+const ICONA_CATEGORIA = { mattina:'☀️', pomeriggio:'🌤️', sera:'🌆', notte:'🌙', riposo:'💤', assenza:'🏖️' };
 
 const SIGLE_ASSENZE = {
   'Congedo ordinario': 'C.O.',
