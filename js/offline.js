@@ -21,7 +21,7 @@ function nascondiPaginaOffline(){
 function inizializzaOffline(){
   renderStatoConnessione();
   window.addEventListener('online',()=>{ renderStatoConnessione(); if(typeof mostraToast==='function') mostraToast('Connessione ripristinata','Ora sei di nuovo online.','successo'); nascondiPaginaOffline(); });
-  window.addEventListener('offline',()=>{ renderStatoConnessione(); if(typeof mostraToast==='function') mostraToast('Modalità offline','I dati locali restano disponibili.','info'); });
+  window.addEventListener('offline',()=>{ renderStatoConnessione(); if(typeof mostraToast==='function') mostraToast('Modalità offline','I dati locali restano disponibili.','info'); mostraPaginaOffline(); });
   window.addEventListener('beforeinstallprompt',e=>{ window._turniInstallPrompt=e; const b=document.getElementById('btnInstallaAppV23'); if(b) b.hidden=false; });
   const b=document.getElementById('btnInstallaAppV23');
   b?.addEventListener('click',async()=>{ if(!window._turniInstallPrompt) return; window._turniInstallPrompt.prompt(); try{ await window._turniInstallPrompt.userChoice; }catch(e){} window._turniInstallPrompt=null; b.hidden=true; });

@@ -1,4 +1,4 @@
-/* Turni & Accessorio PS — Service Worker V40 */
+/* Turni & Accessorio PS — Service Worker V46 */
 'use strict';
 const CACHE='turni-ps-v46';
 const APP_SHELL=[
