@@ -1332,7 +1332,7 @@ h3{ font-family: var(--font-display); font-weight:600; }
 #totaleGiorno,#totale-giorno,[data-field="totaleGiorno"]{font-weight:800;}
 
 /* V23 — Stato connessione e pagina offline */
-.stato-connessione-v23{display:flex;align-items:center;gap:5px;padding:4px 9px;margin-left:auto;border-radius:999px;font-size:.66rem;font-weight:600;border:1px solid var(--bordo);background:var(--carta);color:var(--testo-tenue)}
+.stato-connessione-v23{display:flex;align-items:center;gap:6px;padding:8px 12px;margin:0 0 12px;border-radius:12px;font-size:.72rem;font-weight:600;border:1px solid var(--bordo);background:var(--carta);color:var(--testo-tenue);width:fit-content}
 .stato-connessione-v23 .stato-connessione-dot{width:7px;height:7px;border-radius:50%;background:#9aa3b2}
 .stato-connessione-v23.online .stato-connessione-dot{background:#2f9e5c}
 .stato-connessione-v23.offline{border-color:#e5c477;color:#8a5a00}
