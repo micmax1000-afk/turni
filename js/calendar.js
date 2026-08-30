@@ -621,7 +621,10 @@ function aggiornaDettaglioGiorno(){
   } else if(t.oraInizio && t.oraFine){
     const c = classificaTurno(t);
     const straordinario = totaleStraordinario(c);
-    const totaleGiorno = Number(c.oreTotali || 0) + straordinario;
+    // c.oreTotali è già comprensivo dello straordinario (turno base + finestre di straordinario/rientro):
+    // le ore ordinarie sono la differenza, il totale giorno è semplicemente c.oreTotali (non va sommato di nuovo).
+    const oreOrdinarie = Math.max(0, Number(c.oreTotali || 0) - straordinario);
+    const totaleGiorno = Number(c.oreTotali || 0);
     const categoria = categoriaTurno(t.oraInizio, t.oraFine, t.data);
     const etichetta = INIZIALE_CATEGORIA[categoria] || categoria || 'Turno';
     const servizi = [];
@@ -642,11 +645,11 @@ function aggiornaDettaglioGiorno(){
     corpo.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-${escapeHtml(categoria || 'turno')}">
         <div class="dettaglio-hero-badge">${ICONA_CATEGORIA[categoria] || escapeHtml(etichetta)}</div>
-        <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(c.oreTotali)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
+        <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(oreOrdinarie)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
       </div>
       ${badges.length ? `<div class="dettaglio-pills">${badges.join('')}</div>` : ''}
       <div class="dettaglio-indicatori">
-        <div><span>Ore lavoro</span><strong>${formatOreMinuti(c.oreTotali)}</strong></div>
+        <div><span>Ore ordinarie</span><strong>${formatOreMinuti(oreOrdinarie)}</strong></div>
         <div><span>Straordinario</span><strong class="valore-straordinario">${formatOreMinuti(straordinario)}</strong></div>
         <div><span>Totale giorno</span><strong>${formatOreMinuti(totaleGiorno)}</strong></div>
       </div>
