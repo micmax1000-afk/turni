@@ -622,6 +622,8 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .dettaglio-giorno-riga{padding-bottom:10px;border-bottom:1px solid var(--bordo);}
 .dettaglio-giorno-titolo{font-size:1.05rem;font-weight:700;}
 .dettaglio-giorno-corpo{margin-top:12px;color:var(--testo);white-space:normal;}
+.dettaglio-giorno-sempre{margin-top:12px;color:var(--testo)}
+.dettaglio-giorno-sempre:empty{margin-top:0}
 .dettaglio-hero{display:flex;align-items:center;gap:12px;padding:13px;border-radius:14px;background:#F5F8FC;}
 .dettaglio-hero-badge{min-width:48px;height:42px;padding:0 10px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:.95rem;background:#E8EDF5;color:#334155;}
 .dettaglio-hero>div:last-child{display:flex;flex-direction:column;gap:3px;min-width:0;}

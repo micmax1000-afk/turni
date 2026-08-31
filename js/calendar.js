@@ -594,6 +594,7 @@ function aggiornaDettaglioGiorno(){
   titolo.textContent = `${NOMI_GIORNI[d.getDay()]} ${d.getDate()} ${NOMI_MESI[d.getMonth()]} ${d.getFullYear()}`;
   const t = AppState.turni[giornoSelezionato];
   const corpo = el('dettaglioGiornoCorpo');
+  const sempre = el('dettaglioGiornoSempre');
   const btnModifica = el('btnModificaGiorno');
   const btnRimuovi = el('btnRimuoviGiorno');
   const azioni = document.querySelector('.dettaglio-giorno-azioni-principali');
@@ -623,15 +624,16 @@ function aggiornaDettaglioGiorno(){
   if(azioni) azioni.hidden = false;
 
   if(!t){
-    corpo.innerHTML = `
+    sempre.innerHTML = `
       <div class="giorno-vuoto-card">
         <span class="giorno-vuoto-icona">＋</span>
         <div><strong>Nessun turno inserito</strong><span>Aggiungi il turno o segnala un'assenza per questa giornata.</span></div>
       </div>`;
+    corpo.innerHTML = '';
   } else if(t.assenzaTipo){
     const voceAssenza = AppState.assenze.find(a => a.id === t.assenzaTipo);
     const nome = voceAssenza ? voceAssenza.nome : 'Assenza';
-    corpo.innerHTML = `
+    sempre.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-assenza">
         <div class="dettaglio-hero-badge">${ICONA_CATEGORIA.assenza}</div>
         <div><strong>${escapeHtml(nome)}</strong><span>Giornata registrata come assenza</span></div>
@@ -641,8 +643,9 @@ function aggiornaDettaglioGiorno(){
         <div><span>Data</span><strong>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</strong></div>
         <div><span>Ore turno</span><strong>—</strong></div>
       </div>`;
+    corpo.innerHTML = '';
   } else if(t.riposo){
-    corpo.innerHTML = `
+    sempre.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-riposo">
         <div class="dettaglio-hero-badge">${ICONA_CATEGORIA.riposo}</div>
         <div><strong>Riposo</strong><span>Giornata senza turno programmato</span></div>
@@ -652,6 +655,7 @@ function aggiornaDettaglioGiorno(){
         <div><span>Ore lavoro</span><strong>0:00</strong></div>
         <div><span>Extra</span><strong>—</strong></div>
       </div>`;
+    corpo.innerHTML = '';
   } else if(t.oraInizio && t.oraFine){
     const c = classificaTurno(t);
     const straordinario = totaleStraordinario(c);
@@ -676,7 +680,7 @@ function aggiornaDettaglioGiorno(){
     if(t.missione) badges.push('<span class="dettaglio-pill pill-missione">🛡 Missione</span>');
     if(t.servizioEsterno) badges.push('<span class="dettaglio-pill pill-esterno">🚓 Esterno</span>');
     if(t.reperibilita) badges.push('<span class="dettaglio-pill pill-reperibilita">★ Reperibilità</span>');
-    corpo.innerHTML = `
+    sempre.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-${escapeHtml(categoria || 'turno')}">
         <div class="dettaglio-hero-badge">${ICONA_CATEGORIA[categoria] || escapeHtml(etichetta)}</div>
         <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(oreOrdinarie)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
@@ -686,9 +690,10 @@ function aggiornaDettaglioGiorno(){
         <div><span>Ore ordinarie</span><strong>${formatOreMinuti(oreOrdinarie)}</strong></div>
         <div><span>Straordinario</span><strong class="valore-straordinario">${formatOreMinuti(straordinario)}</strong></div>
         <div><span>Totale giorno</span><strong>${formatOreMinuti(totaleGiorno)}</strong></div>
-      </div>
-      <button type="button" class="dettaglio-sezione-titolo dettaglio-sezione-toggle" data-toggle-sezione="indicatoriGiorno" aria-expanded="true">Indicatori del giorno <span class="dettaglio-sezione-freccia" aria-hidden="true">▾</span></button>
-      <div class="dettaglio-indicatori-icone" id="dettaglioIndicatoriIcone">
+      </div>`;
+    corpo.innerHTML = `
+      <button type="button" class="dettaglio-sezione-titolo dettaglio-sezione-toggle" data-toggle-sezione="indicatoriGiorno" aria-expanded="false">Indicatori del giorno <span class="dettaglio-sezione-freccia" aria-hidden="true">▾</span></button>
+      <div class="dettaglio-indicatori-icone" id="dettaglioIndicatoriIcone" hidden>
         ${servizi.length ? servizi.slice(0,4).map(x => `<div><span class="indicatore-icona indicatore-${x[0]}">${x[1]}</span><small>${escapeHtml(x[2])}</small></div>`).join('') : '<div class="dettaglio-nessun-extra">Nessun indicatore extra</div>'}
       </div>
       <div class="dettaglio-sezione-titolo">Dettagli</div>
@@ -700,7 +705,8 @@ function aggiornaDettaglioGiorno(){
         <div><span>◎ Aggiornamento</span><strong>${t.aggiornamentoProfessionale ? 'Sì' : 'No'}</strong></div>
       </div>`;
   } else {
-    corpo.innerHTML = `<div class="giorno-vuoto-card"><span class="giorno-vuoto-icona">⚠</span><div><strong>Turno incompleto</strong><span>Inserisci ora di inizio e fine per completare la giornata.</span></div></div>`;
+    sempre.innerHTML = `<div class="giorno-vuoto-card"><span class="giorno-vuoto-icona">⚠</span><div><strong>Turno incompleto</strong><span>Inserisci ora di inizio e fine per completare la giornata.</span></div></div>`;
+    corpo.innerHTML = '';
   }
   el('btnCopiaTurno').disabled = !t;
   el('btnIncollaTurno').disabled = !turnoCopiato;
