@@ -1362,3 +1362,9 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .riepilogo-turni-v45-espanso>div{display:flex;justify-content:space-between;font-size:.7rem}
 .riepilogo-turni-v45-espanso strong{font-weight:700}
 .riepilogo-turni-v45-espanso span{opacity:.65}
+
+/* V48 — Dettaglio giorno collassabile (stessa logica del riepilogo mese) */
+.dettaglio-giorno-titolo-btn{display:flex;align-items:center;gap:8px;flex:1;min-width:0;border:0;background:transparent;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.dettaglio-giorno-freccia{opacity:.5;transition:transform .15s ease;flex-shrink:0;font-size:.85rem}
+.dettaglio-giorno-titolo-btn[aria-expanded="true"] .dettaglio-giorno-freccia{transform:rotate(180deg)}
+.dettaglio-giorno-collassabile[hidden]{display:none!important}

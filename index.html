@@ -46,42 +46,11 @@
       <button class="etichetta-mese-btn" id="etichettaMese" type="button" title="Vai a un mese specifico">—</button>
       <button class="btn-freccia" id="btnMeseSucc" type="button" aria-label="Mese successivo">›</button>
     </div>
-    <div id="prossimoTurnoWidget" class="prossimo-turno-widget" hidden>
-      <span class="prossimo-turno-eyebrow">⏭️ Prossimo turno</span>
-      <div class="prossimo-turno-corpo">
-        <span class="prossimo-turno-icona" id="prossimoTurnoIcona">☀️</span>
-        <div class="prossimo-turno-testo">
-          <strong id="prossimoTurnoLabel">—</strong>
-          <span id="prossimoTurnoOrario">—</span>
-        </div>
-        <span class="prossimo-turno-quando" id="prossimoTurnoQuando">—</span>
-      </div>
-    </div>
     <div class="calendario-giorni-settimana">
       <span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
     </div>
     <div class="calendario-griglia" id="calendarioGriglia"></div>
-    <div id="riepilogoTurniV45" class="riepilogo-turni-v45" aria-live="polite">
-      <button type="button" class="riepilogo-turni-v45-titolo" id="riepilogoTurniV45Toggle" aria-expanded="false">
-        <span><strong>Riepilogo mese</strong> <span id="riepilogoTurniV45Mese">—</span></span>
-        <span class="riepilogo-turni-v45-freccia" aria-hidden="true">▾</span>
-      </button>
-      <div class="riepilogo-turni-v45-grid">
-        <div><strong id="v45RtLavoro">0</strong><span>turni</span></div>
-        <div><strong id="v45RtRiposi">0</strong><span>riposi</span></div>
-        <div><strong id="v45RtAssenze">0</strong><span>assenze</span></div>
-        <div><strong id="v45RtStraordinario">0:00</strong><span>straordinario</span></div>
-      </div>
-      <div id="riepilogoTurniV45Espanso" class="riepilogo-turni-v45-espanso" hidden>
-        <div><span>🛡️ Missioni</span><strong id="v45RtMissioni">0</strong></div>
-        <div><span>🚓 Servizio esterno</span><strong id="v45RtServizioEsterno">0</strong></div>
-        <div><span>📞 Reperibilità</span><strong id="v45RtReperibilita">0</strong></div>
-        <div><span>🛡 Ordine pubblico</span><strong id="v45RtOrdinePubblico">0</strong></div>
-        <div><span>🍽️ Buoni pasto</span><strong id="v45RtBuoniPasto">0</strong></div>
-        <div><span>🔄 Ore compensate</span><strong id="v45RtOreCompensate">0:00</strong></div>
-        <div><span>⚡ Extra</span><strong id="v45RtExtra">0</strong></div>
-      </div>
-    </div>
+
     <div class="legenda-colori" id="legendaColoriTurni">
     </div>
     <div style="margin:-4px 0 8px;">
@@ -102,6 +71,18 @@
         <input type="file" id="campoImportaColoriTurni" accept="application/json,.json" hidden>
         <button class="btn-secondario" id="btnRipristinaColoriTurni" type="button">↺ Ripristina predefiniti</button>
         <button class="btn-primario" id="btnChiudiColoriTurni2" type="button">Fatto — torna al calendario</button>
+      </div>
+    </div>
+
+    <div id="prossimoTurnoWidget" class="prossimo-turno-widget" hidden>
+      <span class="prossimo-turno-eyebrow">⏭️ Prossimo turno</span>
+      <div class="prossimo-turno-corpo">
+        <span class="prossimo-turno-icona" id="prossimoTurnoIcona">☀️</span>
+        <div class="prossimo-turno-testo">
+          <strong id="prossimoTurnoLabel">—</strong>
+          <span id="prossimoTurnoOrario">—</span>
+        </div>
+        <span class="prossimo-turno-quando" id="prossimoTurnoQuando">—</span>
       </div>
     </div>
 
@@ -150,16 +131,43 @@
 
     <div class="dettaglio-giorno" id="dettaglioGiorno">
       <div class="dettaglio-giorno-riga">
-        <div class="dettaglio-giorno-titolo" id="dettaglioGiornoTitolo">Seleziona un giorno</div>
+        <button type="button" class="dettaglio-giorno-titolo-btn" id="dettaglioGiornoToggle" aria-expanded="true">
+          <span class="dettaglio-giorno-titolo" id="dettaglioGiornoTitolo">Seleziona un giorno</span>
+          <span class="dettaglio-giorno-freccia" aria-hidden="true">▾</span>
+        </button>
         <div class="dettaglio-giorno-azioni">
           <button class="btn-mini-icona" id="btnCopiaTurno" title="Copia questo turno" aria-label="Copia questo turno" disabled>📄</button>
           <button class="btn-mini-icona" id="btnIncollaTurno" title="Incolla turno copiato" aria-label="Incolla turno copiato" disabled>📌</button>
         </div>
       </div>
-      <div class="dettaglio-giorno-corpo" id="dettaglioGiornoCorpo"></div>
-      <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
-        <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
-      </label>
+      <div class="dettaglio-giorno-collassabile" id="dettaglioGiornoCollassabile">
+        <div class="dettaglio-giorno-corpo" id="dettaglioGiornoCorpo"></div>
+        <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
+          <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
+        </label>
+      </div>
+    </div>
+
+    <div id="riepilogoTurniV45" class="riepilogo-turni-v45" aria-live="polite">
+      <button type="button" class="riepilogo-turni-v45-titolo" id="riepilogoTurniV45Toggle" aria-expanded="false">
+        <span><strong>Riepilogo mese</strong> <span id="riepilogoTurniV45Mese">—</span></span>
+        <span class="riepilogo-turni-v45-freccia" aria-hidden="true">▾</span>
+      </button>
+      <div class="riepilogo-turni-v45-grid">
+        <div><strong id="v45RtLavoro">0</strong><span>turni</span></div>
+        <div><strong id="v45RtRiposi">0</strong><span>riposi</span></div>
+        <div><strong id="v45RtAssenze">0</strong><span>assenze</span></div>
+        <div><strong id="v45RtStraordinario">0:00</strong><span>straordinario</span></div>
+      </div>
+      <div id="riepilogoTurniV45Espanso" class="riepilogo-turni-v45-espanso" hidden>
+        <div><span>🛡️ Missioni</span><strong id="v45RtMissioni">0</strong></div>
+        <div><span>🚓 Servizio esterno</span><strong id="v45RtServizioEsterno">0</strong></div>
+        <div><span>📞 Reperibilità</span><strong id="v45RtReperibilita">0</strong></div>
+        <div><span>🛡 Ordine pubblico</span><strong id="v45RtOrdinePubblico">0</strong></div>
+        <div><span>🍽️ Buoni pasto</span><strong id="v45RtBuoniPasto">0</strong></div>
+        <div><span>🔄 Ore compensate</span><strong id="v45RtOreCompensate">0:00</strong></div>
+        <div><span>⚡ Extra</span><strong id="v45RtExtra">0</strong></div>
+      </div>
     </div>
 
     <button class="fab-aggiungi" id="btnFabTurno" type="button" aria-label="Aggiungi o modifica turno del giorno selezionato">+</button>

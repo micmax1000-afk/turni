@@ -347,8 +347,18 @@ function inizializzaToggleRiepilogoV45(){
     toggle.classList.toggle('aperto', !aperto);
   });
 }
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inizializzaToggleRiepilogoV45);
-else inizializzaToggleRiepilogoV45();
+function inizializzaToggleDettaglioGiorno(){
+  const toggle = el('dettaglioGiornoToggle');
+  const pannello = el('dettaglioGiornoCollassabile');
+  if(!toggle || !pannello) return;
+  toggle.addEventListener('click', () => {
+    const aperto = !pannello.hidden;
+    pannello.hidden = aperto;
+    toggle.setAttribute('aria-expanded', aperto ? 'false' : 'true');
+  });
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); });
+else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); }
 
 function aggiornaProssimoTurno(){
   const widget = el('prossimoTurnoWidget');
