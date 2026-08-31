@@ -359,7 +359,14 @@ function aggiornaProssimoTurno(){
   const chiaviFuture = Object.keys(AppState.turni)
     .filter(iso => iso >= isoOggi && AppState.turni[iso] && AppState.turni[iso].oraInizio && AppState.turni[iso].oraFine && !AppState.turni[iso].riposo && !AppState.turni[iso].assenzaTipo)
     .sort();
-  if(!chiaviFuture.length){ widget.hidden = true; return; }
+  widget.hidden = false;
+  if(!chiaviFuture.length){
+    el('prossimoTurnoIcona').textContent = 'ℹ️';
+    el('prossimoTurnoLabel').textContent = 'Nessun turno programmato';
+    el('prossimoTurnoOrario').textContent = 'Genera o continua la sequenza dei turni per vederlo qui';
+    const pillVuoto = el('prossimoTurnoQuando'); pillVuoto.textContent = ''; pillVuoto.hidden = true;
+    return;
+  }
   const iso = chiaviFuture[0];
   const t = AppState.turni[iso];
   const categoria = categoriaTurno(t.oraInizio, t.oraFine, t.data);
@@ -370,8 +377,7 @@ function aggiornaProssimoTurno(){
   el('prossimoTurnoIcona').textContent = ICONA_CATEGORIA[categoria] || '☀️';
   el('prossimoTurnoLabel').textContent = `${nomeCategoria} — ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
   el('prossimoTurnoOrario').textContent = `${t.oraInizio} → ${t.oraFine}`;
-  el('prossimoTurnoQuando').textContent = quando;
-  widget.hidden = false;
+  const pillQuando = el('prossimoTurnoQuando'); pillQuando.hidden = false; pillQuando.textContent = quando;
 }
 
 function renderCalendario(){
