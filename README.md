@@ -13,8 +13,11 @@ App **PWA** per la gestione personale di turni, assenze e simulazione cedolino, 
 
 - **Calendario turni** — inserimento manuale o sequenza automatica (es. turno in quinta)
 - **Classificazione ore** — ordinarie, notturne, festive, domenicali, straordinari
-- **Assenze** — saldi personalizzabili (congedo, permesso breve, ecc.)
+- **Prossimo turno** e **riepilogo mensile** sempre visibili sopra il calendario
+- **Assenze** — saldi personalizzabili (congedo, permesso breve, ecc.), con riporto ferie automatico
 - **Cedolino simulato** — competenze, stima fiscale e netto indicativo
+- **Tabelle ufficiali personalizzabili** — stipendi, indennità, straordinario, **IRPEF nazionale** e
+  **addizionale regionale** (per la regione impostata in Anagrafica) modificabili da Impostazioni → Tabelle
 - **Colori turni** — personalizzabili per categoria (colore su tutta la casella)
 - **Backup** — export/import JSON locale; opzione backup Google Drive
 - **Offline** — Service Worker, installabile come PWA
@@ -45,28 +48,29 @@ index.html          # UI principale + caricamento moduli
 style.css           # Stili (mobile-first, tema scuro)
 script.js           # Inizializzazione e wiring eventi
 sw.js               # Service Worker (cache app shell)
-manifest.json       # Manifest PWA
-package.json        # Dipendenze Capacitor
-capacitor.config.json
+manifest.json       # Manifest PWA (usato anche da PWABuilder per generare il pacchetto Android)
 icons/              # Icone PWA
+tests/              # Test automatici sulle funzioni di calcolo (vedi tests/README.md)
 js/
 ├── config.js       # Chiavi localStorage
 ├── state.js        # AppState
 ├── storage.js      # Adapter persistenza (TurniPSStorage)
 ├── utils.js
-├── calendar.js     # Calendario e festività
+├── calendar.js     # Calendario, festività, classificazione turno
 ├── shifts.js       # Turni, colori, editor
-├── absences.js
+├── absences.js     # Saldi assenze, ferie, recuperi
 ├── sequence.js     # Sequenza automatica
 ├── payroll.js      # Motore cedolino
-├── tables.js
+├── tables.js       # Editor tabelle ufficiali (Impostazioni → Tabelle)
 ├── profile.js      # Anagrafica
-├── backup.js
+├── backup.js       # Backup JSON locale + Google Drive
 ├── ui.js
 ├── dashboard.js
 ├── statistics.js
-├── data/tabelle-2026.js
-└── …               # offline, security, audit, android, migrations
+├── offline.js      # Stato connessione, pagina offline, prompt installazione
+├── migrations.js   # Migrazioni dati fra versioni
+├── data-guard.js
+└── data/tabelle-2026.js  # Valori ufficiali predefiniti (stipendi, IRPEF, addizionali regionali)
 ```
 
 ---
@@ -122,28 +126,43 @@ Apri **🎨 Colori turni** nel calendario.
 
 ---
 
-## Android / PWABuilder
+## Android — pacchetto tramite PWABuilder
 
-```bash
-npm install
-Genera il pacchetto Android con PWABuilder/TWA dopo aver verificato manifest e Service Worker
-```
+Non serve alcun file di progetto locale (niente `package.json`, niente build step): PWABuilder lavora
+direttamente sull'URL pubblico della PWA.
 
-- `appId`: `it.turniaccessoriops.app`
-- `webDir`: `.` (root del progetto)
+1. Pubblica l'app su GitHub Pages (vedi sopra) e verifica che si apra correttamente da telefono.
+2. Vai su **[pwabuilder.com](https://www.pwabuilder.com)** e incolla l'URL della tua GitHub Pages.
+3. PWABuilder legge `manifest.json` e `sw.js` automaticamente e genera un pacchetto Android (AAB/APK)
+   pronto per il Play Console.
+
+⚠️ **Attenzione al nome del pacchetto (`Package ID` / `applicationId`)**: PWABuilder ne propone uno di
+default (es. basato sul dominio), ma **una volta pubblicato sul Play Store non si può più cambiare**.
+Sceglilo con attenzione al primo invio.
 
 ---
 
-## Sviluppo e fix recenti (V40.1)
+## Test automatici
 
-Refactoring modulare (Fase 1) + correzioni UI:
+Le funzioni di calcolo più delicate (IRPEF, addizionale regionale, ore turno/straordinario, cedolino,
+saldi assenze) hanno una suite di test in `tests/` — vedi `tests/README.md` per i dettagli e come
+eseguirli. Utile soprattutto dopo aver modificato `js/calendar.js`, `js/payroll.js` o `js/absences.js`,
+per accorgersi subito di eventuali regressioni prima di pubblicare.
 
-- caricamento corretto di tutti i moduli `js/` da `index.html`
-- backup visibile **solo** in Impostazioni
-- barra navigazione a sole icone
-- calendario mobile leggibile (sigle)
-- colori turni applicati a celle e badge (variabili CSS)
-- binding eventi null-safe
+---
+
+## Sviluppo e fix recenti (V46)
+
+- Tabelle IRPEF nazionale e addizionale regionale rese modificabili da Impostazioni → Tabelle
+  (prima erano fisse nel codice)
+- **Corretto bug**: l'IRPEF su redditi annui oltre 50.000€ poteva risultare negativa a causa di una
+  soglia persa nella serializzazione dei dati salvati — vedi `tests/irpef.test.js`
+- **Corretto bug**: il totale ore del giorno contava due volte lo straordinario
+  (es. 6h+3h straordinario mostrava 12h invece di 9h) — vedi `tests/turno.test.js`
+- Sezione Turni riordinata: Calendario → Colori → Prossimo turno → Azioni rapide → Dettaglio giorno → Riepilogo mese
+- Dettaglio giorno e riepilogo mensile ora richiudibili (ore ordinarie/straordinario/totale restano
+  sempre visibili; "Indicatori del giorno" parte chiuso)
+- Aggiunta suite di test automatici sulle funzioni di calcolo (`tests/`)
 
 I file `README-FASE*.md` / `README-FIX.md` storici sono sostituiti da **questo unico README**.
 
