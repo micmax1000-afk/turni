@@ -48,7 +48,6 @@ function popolaFormAnagrafica(){
     el('campoComune').value = AppState.anagrafica.comune || '';
     el('campoAddComunale').value = AppState.anagrafica.addComunale ?? '';
     el('campoConiugeACarico').value = AppState.anagrafica.coniugeACarico || 'no';
-    el('campoFigliUnder21').value = AppState.anagrafica.figliUnder21 ?? 0;
     el('campoFigliOver21').value = AppState.anagrafica.figliOver21 ?? 0;
     el('campoSindacato').value = AppState.anagrafica.sindacato || '';
   }
@@ -75,7 +74,6 @@ function aggiornaProfiloAnagrafica(){
   const regione = a.regione || el('campoRegione')?.value || '—';
   const comune = a.comune || el('campoComune')?.value || '';
   const coniuge = (a.coniugeACarico || el('campoConiugeACarico')?.value) === 'si';
-  const under = Number(a.figliUnder21 ?? el('campoFigliUnder21')?.value) || 0;
   const over = Number(a.figliOver21 ?? el('campoFigliOver21')?.value) || 0;
   const sindacato = a.sindacato || el('campoSindacato')?.value || '';
   const required = [qualifica, sede !== 'Sede non impostata' ? sede : '', anni > 0 ? anni : '', regione, comune];
@@ -91,7 +89,7 @@ function aggiornaProfiloAnagrafica(){
     <div class="profilo-summary-card"><span>👮 Qualifica</span><strong>${qualifica}</strong><small>Parametro ${PARAMETRO_STIPENDIALE[qualifica] !== undefined ? PARAMETRO_STIPENDIALE[qualifica].toFixed(2).replace('.',',') : '—'}</small></div>
     <div class="profilo-summary-card"><span>⌛ Servizio</span><strong>${anni ? anni + ' anni' : 'Da impostare'}</strong><small>${a.assegnoFunzionale === 'si' ? 'Assegno funzionale: sì' : 'Assegno funzionale: no'}</small></div>
     <div class="profilo-summary-card"><span>📍 Sede</span><strong>${sede}</strong><small>${regione}</small></div>
-    <div class="profilo-summary-card"><span>👨‍👩‍👧 Famiglia</span><strong>${coniuge ? 'Coniuge + ' : ''}${under + over} figli</strong><small>${sindacato ? 'Sindacato: presente' : 'Dati facoltativi'}</small></div>`;
+    <div class="profilo-summary-card"><span>👨‍👩‍👧 Famiglia</span><strong>${coniuge ? 'Coniuge + ' : ''}${over} figli over 21</strong><small>${sindacato ? 'Sindacato: presente' : 'Dati facoltativi'}</small></div>`;
 }
 
 function cancellaAnagrafica(){
@@ -105,7 +103,6 @@ function cancellaAnagrafica(){
   el('campoComune').value = '';
   el('campoAddComunale').value = '';
   el('campoConiugeACarico').value = 'no';
-  el('campoFigliUnder21').value = 0;
   el('campoFigliOver21').value = 0;
   el('campoSindacato').value = '';
   aggiornaVisualizzazioneParametro();
@@ -123,7 +120,6 @@ function salvaAnagraficaDaModale(){
     comune: el('campoComune').value,
     addComunale: Number(el('campoAddComunale').value) || 0,
     coniugeACarico: el('campoConiugeACarico').value,
-    figliUnder21: Number(el('campoFigliUnder21').value) || 0,
     figliOver21: Number(el('campoFigliOver21').value) || 0,
     sindacato: el('campoSindacato').value
   };

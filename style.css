@@ -355,15 +355,19 @@ h3{ font-family: var(--font-display); font-weight:600; }
   .timbro-simulazione{ position:static; display:inline-block; transform:rotate(-3deg); margin-bottom:10px; }
 }
 
-/* ---------- STAMPA — mostra solo il cedolino generato ---------- */
+/* ---------- STAMPA — mostra solo il cedolino o il riepilogo annuale, a seconda di quale sia visibile ---------- */
 @media print {
   body *{ visibility:hidden; }
-  #contenitoreCedolino, #contenitoreCedolino *{ visibility:visible; }
+  #contenitoreCedolino, #contenitoreCedolino *,
+  #contenitoreRiepilogoAnnuale, #contenitoreRiepilogoAnnuale *{ visibility:visible; }
   #contenitoreCedolino{
     position:absolute; top:0; left:0; width:100%; margin:0; box-shadow:none;
     border:1px solid #ccc;
   }
-  .barra-schede, .fab-aggiungi, .nota-finale, #sezioneBackup, #btnGeneraCedolino, #btnStampaCedolino{ display:none !important; }
+  #contenitoreRiepilogoAnnuale{
+    position:absolute; top:0; left:0; width:100%; margin:0;
+  }
+  .barra-schede, .fab-aggiungi, .nota-finale, #sezioneBackup, #btnGeneraCedolino, #btnStampaCedolino, #btnStampaRiepilogoAnnuale, #btnCancellaRiepilogoAnnuale{ display:none !important; }
   .timbro-simulazione{ position:static; display:block; margin:0 0 12px; transform:none; }
 }
 
@@ -638,6 +642,25 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .dettaglio-sezione-toggle{display:flex;align-items:center;gap:6px;width:100%;border:0;background:transparent;padding:0;margin:16px 0 9px;cursor:pointer;font:inherit;font-size:.78rem;font-weight:800;color:var(--inchiostro);text-align:left}
 .dettaglio-sezione-freccia{opacity:.5;transition:transform .15s ease;font-size:.75rem}
 .dettaglio-sezione-toggle[aria-expanded="true"] .dettaglio-sezione-freccia{transform:rotate(180deg)}
+
+/* V50 — Blocco informativo richiudibile generico (es. nota Assegno Unico in Anagrafica) */
+.info-richiudibile{margin:4px 0 10px;border:1px solid var(--bordo);border-radius:12px;background:var(--carta);overflow:hidden}
+.info-richiudibile-toggle{display:flex;align-items:center;gap:6px;width:100%;border:0;background:transparent;padding:10px 12px;cursor:pointer;font:inherit;font-size:.78rem;font-weight:700;color:var(--inchiostro);text-align:left}
+.info-richiudibile-freccia{opacity:.5;transition:transform .15s ease;margin-left:auto;font-size:.75rem}
+.info-richiudibile-toggle[aria-expanded="true"] .info-richiudibile-freccia{transform:rotate(180deg)}
+.info-richiudibile-corpo{padding:0 12px 12px}
+.info-richiudibile-corpo[hidden]{display:none!important}
+.info-richiudibile-corpo p{margin:0;font-size:.74rem;line-height:1.45;color:var(--testo-tenue)}
+
+/* V49 — Ricerca full-text nelle note del giorno */
+.campo-ricerca-note{margin:0 0 4px}
+.risultati-ricerca-note{display:flex;flex-direction:column;gap:6px;margin:0 0 14px;max-height:260px;overflow-y:auto}
+.risultati-ricerca-note[hidden]{display:none!important}
+.risultato-ricerca-nota{display:flex;flex-direction:column;gap:2px;text-align:left;width:100%;padding:9px 11px;border:1px solid var(--bordo);border-radius:11px;background:var(--carta);cursor:pointer;font:inherit}
+.risultato-ricerca-nota:hover{border-color:var(--gallone);background:var(--sfondo-secondario,#f4f6fa)}
+.risultato-ricerca-nota strong{font-size:.74rem;color:var(--inchiostro)}
+.risultato-ricerca-nota span{font-size:.72rem;color:var(--testo-tenue);line-height:1.3}
+.ricerca-note-vuota{padding:10px;color:var(--testo-tenue);font-size:.78rem;text-align:center;background:var(--carta);border-radius:10px;border:1px solid var(--bordo)}
 .dettaglio-dettagli-lista{border-top:1px solid var(--bordo)}.dettaglio-dettagli-lista>div{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid var(--bordo);font-size:.78rem}.dettaglio-dettagli-lista span{color:var(--testo-tenue)}.dettaglio-dettagli-lista strong{font-weight:700;text-align:right}
 .giorno-vuoto-card{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--carta);color:var(--testo-tenue)}.giorno-vuoto-card>div{display:flex;flex-direction:column;gap:2px}.giorno-vuoto-card strong{color:var(--testo)}.giorno-vuoto-card span{font-size:.76rem}.giorno-vuoto-icona{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#E8EDF5;color:#155EEF;font-weight:800}
 .dettaglio-giorno-azioni-principali{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.dettaglio-giorno-azioni-principali button{min-height:44px;border-radius:10px;font-weight:700;font-size:.78rem;cursor:pointer}.btn-dettaglio-modifica{border:1px solid #155EEF;background:#fff;color:#155EEF}.btn-dettaglio-rimuovi{border:1px solid #EF4444;background:#fff;color:#DC2626}.btn-dettaglio-rimuovi[hidden]{display:none}
@@ -880,7 +903,8 @@ h3{ font-family: var(--font-display); font-weight:600; }
 @media(max-width:700px){.stat-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-chart-row{grid-template-columns:64px 1fr 68px}.stat-mese-row{grid-template-columns:60px 1fr auto}}
 @media(max-width:390px){.stat-card{padding:10px}.stat-card strong{font-size:1rem}.stat-chart-row{grid-template-columns:58px 1fr 62px;font-size:.72rem}}
 /* V14 — dashboard statistiche */
-.statistiche-dashboard{max-width:900px;margin-inline:auto}.statistiche-dashboard .intestazione-scheda{align-items:flex-start}.statistica-anno{max-width:180px;margin:8px 0 16px}.stat-blocco{margin-top:18px;padding:16px;border:1px solid var(--bordo);border-radius:14px;background:var(--carta)}.stat-blocco h3{margin:0 0 12px;font-size:1rem}.stat-v-row{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;margin:9px 0;font-size:.8rem}.stat-v-row>span{font-weight:700;text-transform:uppercase}.stat-v-track{height:10px;border-radius:999px;background:var(--sfondo);overflow:hidden}.stat-v-fill{height:100%;border-radius:inherit;background:var(--gallone);min-width:0}.stat-v-fill.stat-netto{background:var(--tipo-notte)}.stat-v-row>b{font-family:var(--font-cifre);font-size:.76rem;white-space:nowrap}.stat-dettagli{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}.stat-dettagli>div{padding:12px;border:1px solid var(--bordo);border-radius:12px;background:var(--carta);display:flex;flex-direction:column;gap:7px}.stat-dettagli span{font-size:.76rem;color:var(--testo-tenue)}.stat-dettagli strong{font-family:var(--font-cifre)}
+.statistiche-dashboard{max-width:900px;margin-inline:auto}.statistiche-dashboard .intestazione-scheda{align-items:flex-start}.statistica-anno{max-width:180px;margin:8px 0 16px}.stat-blocco{margin-top:18px;padding:16px;border:1px solid var(--bordo);border-radius:14px;background:var(--carta)}.stat-blocco h3{margin:0 0 12px;font-size:1rem}.stat-v-row{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;margin:9px 0;font-size:.8rem}.stat-v-row>span{font-weight:700;text-transform:uppercase}.stat-v-track{height:10px;border-radius:999px;background:var(--sfondo);overflow:hidden}.stat-v-fill{height:100%;border-radius:inherit;background:var(--gallone);min-width:0}.stat-v-fill.stat-netto{background:var(--tipo-notte)}
+.stat-v-fill.stat-stra{background:var(--tipo-straordinario, #C77D2E)}.stat-v-row>b{font-family:var(--font-cifre);font-size:.76rem;white-space:nowrap}.stat-dettagli{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}.stat-dettagli>div{padding:12px;border:1px solid var(--bordo);border-radius:12px;background:var(--carta);display:flex;flex-direction:column;gap:7px}.stat-dettagli span{font-size:.76rem;color:var(--testo-tenue)}.stat-dettagli strong{font-family:var(--font-cifre)}
 @media(max-width:600px){.stat-dettagli{grid-template-columns:repeat(2,1fr)}.statistiche-dashboard .intestazione-scheda{gap:10px}.statistiche-dashboard .intestazione-scheda h2{font-size:1.1rem}.stat-v-row{grid-template-columns:34px 1fr auto;font-size:.72rem}.stat-v-row>b{font-size:.68rem}.stat-blocco{padding:13px}}
 
 /* V15 — Impostazioni centralizzate */

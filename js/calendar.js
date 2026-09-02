@@ -372,8 +372,60 @@ function inizializzaToggleIndicatoriGiorno(){
     btn.setAttribute('aria-expanded', aperto ? 'false' : 'true');
   });
 }
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); });
-else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); }
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); inizializzaRicercaNoteGiorni(); });
+else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); inizializzaRicercaNoteGiorni(); }
+
+function eseguiRicercaNoteGiorni(testo){
+  const contenitore = el('risultatiRicercaNoteGiorni');
+  if(!contenitore) return;
+  const query = (testo || '').trim().toLowerCase();
+  if(!query){
+    contenitore.hidden = true;
+    contenitore.innerHTML = '';
+    return;
+  }
+  const risultati = Object.entries(AppState.noteGiorni || {})
+    .filter(([, nota]) => nota && nota.toLowerCase().includes(query))
+    .sort(([isoA], [isoB]) => isoB.localeCompare(isoA)) // più recenti prima
+    .slice(0, 20); // evita elenchi infiniti su note molto ripetitive
+
+  contenitore.hidden = false;
+  if(!risultati.length){
+    contenitore.innerHTML = `<div class="ricerca-note-vuota">Nessuna nota contiene "${escapeHtml(testo.trim())}".</div>`;
+    return;
+  }
+  contenitore.innerHTML = risultati.map(([iso, nota]) => {
+    const d = new Date(iso + 'T00:00:00');
+    const dataLeggibile = `${String(d.getDate()).padStart(2,'0')} ${NOMI_MESI[d.getMonth()].slice(0,3)} ${d.getFullYear()}`;
+    // Estrae un frammento di contesto intorno al match, invece di mostrare sempre l'inizio della nota.
+    const idx = nota.toLowerCase().indexOf(query);
+    const inizio = Math.max(0, idx - 25);
+    const frammento = (inizio > 0 ? '…' : '') + nota.slice(inizio, idx + query.length + 40) + (idx + query.length + 40 < nota.length ? '…' : '');
+    return `<button type="button" class="risultato-ricerca-nota" data-vai-a-giorno="${escapeHtml(iso)}"><strong>${dataLeggibile}</strong><span>${escapeHtml(frammento)}</span></button>`;
+  }).join('');
+}
+
+function inizializzaRicercaNoteGiorni(){
+  const campo = el('campoRicercaNoteGiorni');
+  const contenitore = el('risultatiRicercaNoteGiorni');
+  if(!campo || !contenitore) return;
+  campo.addEventListener('input', () => eseguiRicercaNoteGiorni(campo.value));
+  contenitore.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-vai-a-giorno]');
+    if(!btn) return;
+    const iso = btn.dataset.vaiAGiorno;
+    const d = new Date(iso + 'T00:00:00');
+    annoCorrente = d.getFullYear();
+    meseCorrente = d.getMonth();
+    renderCalendario();
+    selezionaGiorno(iso);
+    campo.value = '';
+    contenitore.hidden = true;
+    contenitore.innerHTML = '';
+    const dettaglio = el('dettaglioGiorno');
+    if(dettaglio) dettaglio.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
 
 function aggiornaProssimoTurno(){
   const widget = el('prossimoTurnoWidget');

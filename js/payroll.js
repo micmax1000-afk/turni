@@ -392,6 +392,7 @@ function renderRiepilogoAnnuale(anno){
   el('raMesiLordo').textContent = `(${mesiInclusi}/12 mesi generati)`;
   el('contenitoreRiepilogoAnnuale').hidden = false;
   el('btnCancellaRiepilogoAnnuale').hidden = false;
+  el('btnStampaRiepilogoAnnuale').hidden = false;
 }
 
 // V13 — statistiche dello storico mensile

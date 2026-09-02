@@ -1,5 +1,40 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
+// Stampa/esporta in PDF una sola sezione fra quelle stampabili (cedolino, riepilogo annuale),
+// nascondendo temporaneamente le altre eventualmente aperte per evitare che si sovrappongano
+// nell'output di stampa. Il CSS @media print mostra comunque solo elementi non-[hidden].
+const SEZIONI_STAMPABILI = ['contenitoreCedolino', 'contenitoreRiepilogoAnnuale'];
+function stampaSezione(idDaMostrare){
+  const nascostiTemporaneamente = SEZIONI_STAMPABILI
+    .filter(id => id !== idDaMostrare)
+    .map(id => el(id))
+    .filter(elemento => elemento && !elemento.hidden);
+  nascostiTemporaneamente.forEach(elemento => { elemento.hidden = true; });
+  const ripristina = () => {
+    nascostiTemporaneamente.forEach(elemento => { elemento.hidden = false; });
+    window.removeEventListener('afterprint', ripristina);
+  };
+  window.addEventListener('afterprint', ripristina);
+  window.print();
+}
+
+function inizializzaInfoRichiudibili(){
+  // Toggle generico per i blocchi informativi richiudibili (es. nota Assegno Unico in Anagrafica).
+  document.querySelectorAll('.info-richiudibile-toggle').forEach(toggle => {
+    if(toggle.dataset.inizializzato) return;
+    toggle.dataset.inizializzato = '1';
+    toggle.addEventListener('click', () => {
+      const corpo = toggle.nextElementSibling;
+      if(!corpo) return;
+      const aperto = !corpo.hidden;
+      corpo.hidden = aperto;
+      toggle.setAttribute('aria-expanded', aperto ? 'false' : 'true');
+    });
+  });
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', inizializzaInfoRichiudibili);
+else inizializzaInfoRichiudibili();
+
 function mostraAvviso(messaggio, titolo){
   el('titoloAvviso').textContent = titolo || 'Avviso';
   el('testoAvviso').textContent = messaggio;

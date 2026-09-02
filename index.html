@@ -90,6 +90,10 @@
       <div class="azioni-calendario-header">
         <div><strong>⚡ Azioni rapide</strong><span>Filtra il calendario o prepara rapidamente un'azione per il giorno selezionato.</span></div>
       </div>
+      <label class="campo-modale campo-ricerca-note">🔎 Cerca nelle note
+        <input type="search" id="campoRicercaNoteGiorni" placeholder="Es. dentista, corso, cambio con Rossi…" autocomplete="off">
+      </label>
+      <div id="risultatiRicercaNoteGiorni" class="risultati-ricerca-note" hidden></div>
       <div class="azioni-calendario-grid">
         <label class="campo-modale">🔎 Visualizza
           <select id="filtroCalendarioSelect">
@@ -388,6 +392,7 @@
         </tfoot>
       </table>
     </div>
+    <button class="btn-secondario" id="btnStampaRiepilogoAnnuale" type="button" hidden style="margin-top:12px;">🖨️ Stampa / Esporta PDF</button>
     <button class="btn-secondario" id="btnCancellaRiepilogoAnnuale" type="button" hidden style="margin-top:12px;">🗑️ Cancella Riepilogo</button>
   </section>
   <section class="scheda nota-finale">
@@ -474,13 +479,15 @@
     <label class="campo-modale">Coniuge a carico
       <select id="campoConiugeACarico"><option value="no">No</option><option value="si">Sì</option></select>
     </label>
-    <label class="campo-modale">Figli a carico under 21 anni (numero)
-      <input type="number" id="campoFigliUnder21" min="0" step="1" value="0">
-    </label>
     <label class="campo-modale">Figli a carico over 21 anni (numero)
       <input type="number" id="campoFigliOver21" min="0" step="1" value="0">
     </label>
-    <p class="sotto-titolo" style="margin:-6px 0 4px;">⚠ Per i figli under 21 anni la detrazione fiscale è quasi sempre sostituita dall'Assegno Unico Universale (dal marzo 2022) e non si somma ad esso — se lo percepisci, lascia questo campo a 0 per non falsare il netto stimato.</p>
+    <div class="info-richiudibile">
+      <button type="button" class="info-richiudibile-toggle" id="toggleInfoFigliUnder21" aria-expanded="false">ℹ️ Figli under 21 a carico? <span class="info-richiudibile-freccia" aria-hidden="true">▾</span></button>
+      <div class="info-richiudibile-corpo" id="corpoInfoFigliUnder21" hidden>
+        <p>Dal marzo 2022 la detrazione fiscale per i figli under 21 è sostituita dall'<strong>Assegno Unico e Universale</strong> (INPS), che questa app non gestisce. Non c'è quindi un campo da compilare qui: verifica l'importo dell'Assegno Unico direttamente sul cedolino ufficiale o sull'app INPS.</p>
+      </div>
+    </div>
     <label class="campo-modale">Iscrizione sindacale (facoltativa)
       <input type="text" id="campoSindacato" placeholder="es. SIULP — lascia vuoto se nessuna">
     </label>

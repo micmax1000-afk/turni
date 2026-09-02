@@ -604,7 +604,7 @@ function inizializza(){
 
   el('btnGeneraCedolino').addEventListener('click', renderCedolino);
   el('btnGeneraAccreditoConto').addEventListener('click', renderAccreditoConto);
-  el('btnStampaCedolino').addEventListener('click', () => window.print());
+  el('btnStampaCedolino').addEventListener('click', () => stampaSezione('contenitoreCedolino'));
   el('btnNascondiCedolino').addEventListener('click', () => {
     el('contenitoreCedolino').hidden = true;
     el('contenitoreCedolino').innerHTML = '';
@@ -625,7 +625,9 @@ function inizializza(){
   el('btnCancellaRiepilogoAnnuale').addEventListener('click', () => {
     el('contenitoreRiepilogoAnnuale').hidden = true;
     el('btnCancellaRiepilogoAnnuale').hidden = true;
+    el('btnStampaRiepilogoAnnuale').hidden = true;
   });
+  el('btnStampaRiepilogoAnnuale').addEventListener('click', () => stampaSezione('contenitoreRiepilogoAnnuale'));
   el('campoConguagliMese').addEventListener('input', () => {
     AppState.conguagliPerMese[chiaveMese(annoCorrente, meseCorrente)] = Number(el('campoConguagliMese').value) || 0;
     salvaConguagliStorage();
