@@ -1,12 +1,12 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
 const CATEGORIE_COLORABILI = [
-  { chiave:'sera', etichetta:'Sera', predefinito:'#CFE8FF', spiegazione:'Sera — azzurro' },
-  { chiave:'pomeriggio', etichetta:'Pomeriggio', predefinito:'#E0F5DD', spiegazione:'Pomeriggio — verde chiaro' },
-  { chiave:'mattina', etichetta:'Mattina', predefinito:'#FFF3B0', spiegazione:'Mattina — giallo' },
-  { chiave:'notte', etichetta:'Notte', predefinito:'#FFDFC2', spiegazione:'Notte — arancione' },
-  { chiave:'riposo', etichetta:'Riposo', predefinito:'#FFC9C9', spiegazione:'Riposo — rosso' },
-  { chiave:'assenza', etichetta:'Assenze', predefinito:'#E6D9FF', spiegazione:'Assenze — violetto' }
+  { chiave:'sera', etichetta:'Sera', predefinito:'#FFC2B0', spiegazione:'Sera — corallo tramonto' },
+  { chiave:'pomeriggio', etichetta:'Pomeriggio', predefinito:'#FFD9A0', spiegazione:'Pomeriggio — arancio pieno' },
+  { chiave:'mattina', etichetta:'Mattina', predefinito:'#FFF3B0', spiegazione:'Mattina — giallo alba' },
+  { chiave:'notte', etichetta:'Notte', predefinito:'#C7D6F5', spiegazione:'Notte — blu notturno' },
+  { chiave:'riposo', etichetta:'Riposo', predefinito:'#D7ECD0', spiegazione:'Riposo — verde salvia' },
+  { chiave:'assenza', etichetta:'Assenze', predefinito:'#E4E2E8', spiegazione:'Assenze — grigio neutro' }
 ];
 
 
