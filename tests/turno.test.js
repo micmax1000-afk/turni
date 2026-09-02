@@ -68,6 +68,25 @@ test('categoriaTurno: riconosce correttamente mattina/pomeriggio/sera/notte', ()
   assert.equal(app.categoriaTurno('00:00', '07:00', '2026-08-27'), 'notte');
 });
 
+test('iconaAssenza: assegna un\'icona specifica per ciascun tipo di assenza predefinito', () => {
+  const app = caricaApp();
+  assert.equal(app.iconaAssenza('Congedo ordinario'), '🏖️');
+  // Regressione: "straordinario" contiene la sottostringa "ordinario", quindi un controllo
+  // nell'ordine sbagliato lo farebbe finire nel ramo delle ferie invece che in quello dedicato.
+  assert.equal(app.iconaAssenza('Congedo straordinario'), '🏠');
+  assert.equal(app.iconaAssenza('Riposo compensativo'), '🔄');
+  assert.equal(app.iconaAssenza('L104'), '♿');
+  assert.equal(app.iconaAssenza('Ore studio'), '📚');
+  assert.equal(app.iconaAssenza('Donazione sangue'), '🩸');
+});
+
+test('iconaAssenza: una voce personalizzata non riconosciuta usa l\'icona generica, non quella delle ferie', () => {
+  const app = caricaApp();
+  assert.equal(app.iconaAssenza('Corso di aggiornamento professionale'), '📌');
+  assert.equal(app.iconaAssenza(''), '📌');
+  assert.equal(app.iconaAssenza(undefined), '📌');
+});
+
 test('formatOreMinuti: converte correttamente ore decimali in formato h:mm', () => {
   const app = caricaApp();
   assert.equal(app.formatOreMinuti(6), '6:00');

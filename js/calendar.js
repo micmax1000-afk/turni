@@ -687,7 +687,7 @@ function aggiornaDettaglioGiorno(){
     const nome = voceAssenza ? voceAssenza.nome : 'Assenza';
     sempre.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-assenza">
-        <div class="dettaglio-hero-badge">${ICONA_CATEGORIA.assenza}</div>
+        <div class="dettaglio-hero-badge">${iconaAssenza(nome)}</div>
         <div><strong>${escapeHtml(nome)}</strong><span>Giornata registrata come assenza</span></div>
       </div>
       <div class="dettaglio-indicatori">
@@ -778,7 +778,26 @@ const MODELLI_TURNO = {
 
 const INIZIALE_CATEGORIA = { mattina:'Mattina', pomeriggio:'Pomeriggio', sera:'Sera', notte:'Notte', riposo:'Riposo' };
 const CODICE_CATEGORIA = { mattina:'M', pomeriggio:'P', sera:'S', notte:'N', riposo:'R' };
-const ICONA_CATEGORIA = { mattina:'☀️', pomeriggio:'🌤️', sera:'🌆', notte:'🌙', riposo:'💤', assenza:'🏖️' };
+const ICONA_CATEGORIA = { mattina:'☀️', pomeriggio:'🌤️', sera:'🌇', notte:'🌙', riposo:'💤', assenza:'🏖️' };
+
+// Icona specifica per tipo di assenza, riconosciuta dal nome (case-insensitive, per parola chiave)
+// così funziona anche con piccole varianti di formulazione. Le voci personalizzate non riconosciute
+// ricadono su un'icona generica (📌) invece del generico ombrellone, pensato solo per le ferie.
+function iconaAssenza(nome){
+  const n = (nome || '').toLowerCase();
+  if(n.includes('straordinario')) return '🏠';
+  if(n.includes('ordinario') || n.includes('ferie')) return '🏖️';
+  if(n.includes('riposo') || n.includes('recupero')) return '🔄';
+  if(n.includes('aspettativa')) return '⏸️';
+  if(n.includes('maternità') || n.includes('maternita') || n.includes('paternità') || n.includes('paternita')) return '👶';
+  if(n.includes('parentale')) return '🧸';
+  if(n.includes('l104') || n.includes('legge 104') || n.includes('104')) return '♿';
+  if(n.includes('donazione') || n.includes('sangue')) return '🩸';
+  if(n.includes('studio')) return '📚';
+  if(n.includes('permesso breve') || n.includes('breve')) return '⏱️';
+  if(n.includes('sindacale') || n.includes('sindacat')) return '🤝';
+  return '📌';
+}
 
 const SIGLE_ASSENZE = {
   'Congedo ordinario': 'C.O.',
