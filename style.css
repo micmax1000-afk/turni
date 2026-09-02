@@ -1150,24 +1150,6 @@ h3{ font-family: var(--font-display); font-weight:600; }
   outline-offset:2px;
 }
 
-/* V51 — Pulsante "Altri colori" e tavolozza preimpostata */
-.btn-mostra-palette{
-  font-size:.68rem; font-weight:600; padding:0 10px; height:48px;
-  border-radius:12px; border:1px solid var(--bordo); background:var(--carta);
-  cursor:pointer; color:var(--testo-tenue); white-space:nowrap;
-}
-.btn-mostra-palette[aria-expanded="true"]{ background:var(--sfondo-secondario,#f4f6fa); color:var(--inchiostro); }
-.palette-colori-turno{
-  flex-basis:100%; display:flex; flex-wrap:wrap; gap:7px;
-  margin-top:4px; padding-top:10px; border-top:1px dashed var(--bordo);
-}
-.palette-colori-turno[hidden]{ display:none!important; }
-.palette-swatch{
-  width:28px; height:28px; border-radius:8px; border:1px solid var(--bordo);
-  cursor:pointer; padding:0; flex-shrink:0; transition:transform .1s ease;
-}
-.palette-swatch:hover{ transform:scale(1.18); border-color:var(--gallone); }
-
 
 /* Tavolozza colori — chiusura chiara */
 .pannello-colori-header{
