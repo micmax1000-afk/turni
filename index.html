@@ -135,7 +135,7 @@
 
     <div class="dettaglio-giorno" id="dettaglioGiorno">
       <div class="dettaglio-giorno-riga">
-        <button type="button" class="dettaglio-giorno-titolo-btn" id="dettaglioGiornoToggle" aria-expanded="true">
+        <button type="button" class="dettaglio-giorno-titolo-btn" id="dettaglioGiornoToggle" aria-expanded="false">
           <span class="dettaglio-giorno-titolo" id="dettaglioGiornoTitolo">Seleziona un giorno</span>
           <span class="dettaglio-giorno-freccia" aria-hidden="true">▾</span>
         </button>
@@ -145,7 +145,7 @@
         </div>
       </div>
       <div class="dettaglio-giorno-sempre" id="dettaglioGiornoSempre"></div>
-      <div class="dettaglio-giorno-collassabile" id="dettaglioGiornoCollassabile">
+      <div class="dettaglio-giorno-collassabile" id="dettaglioGiornoCollassabile" hidden>
         <div class="dettaglio-giorno-corpo" id="dettaglioGiornoCorpo"></div>
         <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
           <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
@@ -474,7 +474,7 @@
     </label>
     <p class="sotto-titolo" style="margin:-6px 0 0;">📌 L'addizionale regionale ora si calcola da sola in base alla regione scelta e allo scaglione di reddito annuo (fonte: elenco ufficiale aliquote regionali 2026) — non serve più inserirla a mano.</p>
     <label class="campo-modale">Addizionale comunale IRPEF (%)
-      <input type="number" id="campoAddComunale" min="0" step="0.01" placeholder="dal tuo cedolino reale, es. 0,80">
+      <input type="number" id="campoAddComunale" min="0" step="0.01" value="0.8">
     </label>
     <label class="campo-modale">Coniuge a carico
       <select id="campoConiugeACarico"><option value="no">No</option><option value="si">Sì</option></select>

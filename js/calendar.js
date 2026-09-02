@@ -744,8 +744,8 @@ function aggiornaDettaglioGiorno(){
         <div><span>Totale giorno</span><strong>${formatOreMinuti(totaleGiorno)}</strong></div>
       </div>`;
     corpo.innerHTML = `
-      <button type="button" class="dettaglio-sezione-titolo dettaglio-sezione-toggle" data-toggle-sezione="indicatoriGiorno" aria-expanded="false">Indicatori del giorno <span class="dettaglio-sezione-freccia" aria-hidden="true">▾</span></button>
-      <div class="dettaglio-indicatori-icone" id="dettaglioIndicatoriIcone" hidden>
+      <button type="button" class="dettaglio-sezione-titolo dettaglio-sezione-toggle" data-toggle-sezione="indicatoriGiorno" aria-expanded="true">Indicatori del giorno <span class="dettaglio-sezione-freccia" aria-hidden="true">▾</span></button>
+      <div class="dettaglio-indicatori-icone" id="dettaglioIndicatoriIcone">
         ${servizi.length ? servizi.slice(0,4).map(x => `<div><span class="indicatore-icona indicatore-${x[0]}">${x[1]}</span><small>${escapeHtml(x[2])}</small></div>`).join('') : '<div class="dettaglio-nessun-extra">Nessun indicatore extra</div>'}
       </div>
       <div class="dettaglio-sezione-titolo">Dettagli</div>

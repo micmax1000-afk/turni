@@ -1,12 +1,24 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
 const CATEGORIE_COLORABILI = [
-  { chiave:'mattina', etichetta:'Mattina', predefinito:'#FFF0D9', spiegazione:'Mattina — arancione chiaro' },
-  { chiave:'pomeriggio', etichetta:'Pomeriggio', predefinito:'#FFF0B8', spiegazione:'Pomeriggio — giallo ambrato' },
   { chiave:'sera', etichetta:'Sera', predefinito:'#E8E2FF', spiegazione:'Sera — viola chiaro' },
+  { chiave:'pomeriggio', etichetta:'Pomeriggio', predefinito:'#FFF0B8', spiegazione:'Pomeriggio — giallo ambrato' },
+  { chiave:'mattina', etichetta:'Mattina', predefinito:'#FFF0D9', spiegazione:'Mattina — arancione chiaro' },
   { chiave:'notte', etichetta:'Notte', predefinito:'#DDEAFF', spiegazione:'Notte — blu chiaro' },
   { chiave:'riposo', etichetta:'Riposo', predefinito:'#E8F4EA', spiegazione:'Riposo — verde soft (casella intera)' },
   { chiave:'assenza', etichetta:'Assenze', predefinito:'#E7E9ED', spiegazione:'Assenze — grigio (casella intera)' }
+];
+
+// Tavolozza di colori pastello pronti all'uso, oltre al selettore libero. Tonalità tenui e
+// leggibili (testo scuro sopra), organizzate per famiglia di colore così l'utente vede subito
+// diverse scale fra cui scegliere invece di dover aprire il selettore nativo del telefono.
+const PALETTE_COLORI_TURNI = [
+  '#FFD9D9','#FFC2C2','#FFE0D9','#FFD9C2', // rosa / corallo
+  '#FFF0D9','#FFE4B8','#FFF0B8','#FFE699', // arancio / giallo ambrato
+  '#F5F5C2','#EAF5C2','#E8F4EA','#D9F0D9', // giallo verde / verde soft
+  '#C2F0E0','#C2ECEC','#D9F0F5','#DDEAFF', // verde acqua / azzurro
+  '#C2DFFF','#D9E2FF','#E8E2FF','#EAD9FF', // blu / viola chiaro
+  '#F0D9FF','#F5D9EC','#E7E9ED','#D6D9DE'  // magenta chiaro / grigio
 ];
 
 
@@ -45,40 +57,59 @@ function renderColoriTurni(){
     const valoreInputColore = coloreCategoria(c.chiave);
     const spieg = c.spiegazione || c.etichetta;
     return `
-    <div class="riga-colore-categoria">
+    <div class="riga-colore-categoria" data-riga-categoria="${c.chiave}">
       <div class="riga-colore-info">
         <span class="etichetta-categoria">${spieg}</span>
         <span class="anteprima-colore" style="background:${valoreInputColore}" title="${valoreInputColore}"></span>
         <code class="codice-colore">${valoreInputColore}</code>
       </div>
       <div class="griglia-swatch">
-        <label class="swatch-colore-libero" title="Cambia colore: ${spieg}">
+        <label class="swatch-colore-libero" title="Scegli un colore personalizzato: ${spieg}">
           <input type="color" data-categoria-libero="${c.chiave}" value="${valoreInputColore}" aria-label="${spieg}">
         </label>
+        <button type="button" class="btn-mostra-palette" data-toggle-palette="${c.chiave}" aria-expanded="false">🎨 Altri colori</button>
+      </div>
+      <div class="palette-colori-turno" data-palette="${c.chiave}" hidden>
+        ${PALETTE_COLORI_TURNI.map(hex => `<button type="button" class="palette-swatch" data-palette-colore="${hex}" style="background:${hex}" title="${hex}" aria-label="Usa il colore ${hex} per ${spieg}"></button>`).join('')}
       </div>
     </div>`;
   }).join('');
-  function applicaScelta(input){
-    const chiave = input.getAttribute('data-categoria-libero') || input.dataset.categoriaLibero;
+  function applicaColore(chiave, val, riga){
     if(!chiave) return;
-    const val = input.value;
-    if(!AppState.coloriTurni) AppState.coloriTurni = {};
     AppState.coloriTurni[chiave] = val;
     salvaColoriTurniStorage();
     applicaColoriTurni();
     if(typeof renderCalendario === 'function') renderCalendario();
-    // aggiorna anteprima nella riga
-    const riga = input.closest('.riga-colore-categoria');
     if(riga){
       const ant = riga.querySelector('.anteprima-colore');
       const cod = riga.querySelector('.codice-colore');
+      const inputNativo = riga.querySelector('[data-categoria-libero]');
       if(ant) ant.style.background = val;
       if(cod) cod.textContent = val;
+      if(inputNativo) inputNativo.value = val;
     }
   }
   box.querySelectorAll('[data-categoria-libero]').forEach(input => {
-    input.addEventListener('input', () => applicaScelta(input));
-    input.addEventListener('change', () => applicaScelta(input));
+    const applica = () => applicaColore(input.dataset.categoriaLibero, input.value, input.closest('.riga-colore-categoria'));
+    input.addEventListener('input', applica);
+    input.addEventListener('change', applica);
+  });
+  box.querySelectorAll('[data-toggle-palette]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const riga = btn.closest('.riga-colore-categoria');
+      const palette = riga ? riga.querySelector('.palette-colori-turno') : null;
+      if(!palette) return;
+      const aperto = !palette.hidden;
+      palette.hidden = aperto;
+      btn.setAttribute('aria-expanded', aperto ? 'false' : 'true');
+    });
+  });
+  box.querySelectorAll('[data-palette-colore]').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      const riga = swatch.closest('.riga-colore-categoria');
+      if(!riga) return;
+      applicaColore(riga.dataset.rigaCategoria, swatch.dataset.paletteColore, riga);
+    });
   });
 }
 

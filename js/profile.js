@@ -46,7 +46,7 @@ function popolaFormAnagrafica(){
     el('campoSede').value = AppState.anagrafica.sede || '';
     el('campoRegione').value = AppState.anagrafica.regione || 'Lombardia';
     el('campoComune').value = AppState.anagrafica.comune || '';
-    el('campoAddComunale').value = AppState.anagrafica.addComunale ?? '';
+    el('campoAddComunale').value = AppState.anagrafica.addComunale ?? 0.8;
     el('campoConiugeACarico').value = AppState.anagrafica.coniugeACarico || 'no';
     el('campoFigliOver21').value = AppState.anagrafica.figliOver21 ?? 0;
     el('campoSindacato').value = AppState.anagrafica.sindacato || '';
@@ -101,7 +101,7 @@ function cancellaAnagrafica(){
   el('campoSede').value = '';
   el('campoRegione').value = 'Lombardia';
   el('campoComune').value = '';
-  el('campoAddComunale').value = '';
+  el('campoAddComunale').value = 0.8;
   el('campoConiugeACarico').value = 'no';
   el('campoFigliOver21').value = 0;
   el('campoSindacato').value = '';
