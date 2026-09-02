@@ -129,7 +129,7 @@ function generaCedolino(anno, mese){
   const addizionali = round2(imponibileFiscaleTotale * (aliqRegionale + aliqComunale) / 100);
 
   // 8. Sindacato
-  const sindacato = (AppState.anagrafica && AppState.anagrafica.sindacato) ? AppState.tabelle.sindacatoMensile : 0;
+  const sindacato = (AppState.anagrafica && normalizzaSindacato(AppState.anagrafica.sindacato) === 'si') ? AppState.tabelle.sindacatoMensile : 0;
 
   // 9. Conguagli (inseriti manualmente dall'utente per il mese corrente)
   const conguagli = round2(Number(AppState.conguagliPerMese[chiaveMese(anno, mese)]) || 0);
@@ -186,7 +186,7 @@ function generaAccreditoConto(anno, mese){
   const aliqComunale = AppState.anagrafica ? (Number(AppState.anagrafica.addComunale) || 0) : 0;
   const addizionali = round2(imponibileFiscaleTotale * (aliqRegionale + aliqComunale) / 100);
 
-  const sindacato = (AppState.anagrafica && AppState.anagrafica.sindacato) ? AppState.tabelle.sindacatoMensile : 0;
+  const sindacato = (AppState.anagrafica && normalizzaSindacato(AppState.anagrafica.sindacato) === 'si') ? AppState.tabelle.sindacatoMensile : 0;
 
   const lordoTotale = round2(fisseBase + tredicesimaAccredito + accessorieLorde);
   const netto = round2(lordoTotale - contributi - irpefTotale + detrazioni + trattamentoIntegrativo - addizionali - sindacato);

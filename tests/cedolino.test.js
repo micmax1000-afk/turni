@@ -97,6 +97,22 @@ test('calcolaCompetenze: la produttività collettiva compare SOLO nel cedolino d
   assert.equal(giugno.accessorie.indProduttivitaCollettiva, 0, 'negli altri mesi la produttività collettiva deve essere zero');
 });
 
+test('generaCedolino: trattenuta sindacale attiva solo con iscrizione "si", zero con "no", retrocompatibile con vecchio testo libero', () => {
+  // Regressione: il campo era un tempo testo libero (es. "SIULP"). Passando a un selettore Sì/No,
+  // un controllo troppo rigido (=== 'si') avrebbe potuto trattare 'no' come stringa "truthy" e
+  // detrarre comunque la quota, oppure perdere il dato di chi aveva già scritto un nome sindacale.
+  const app = caricaApp();
+  configuraAppBase(app, { sindacato: 'no' });
+  popolaMeseConTurnoSemplice(app, 2026, 2, '07:00', '13:00');
+  assert.equal(app.generaCedolino(2026, 2).sindacato, 0);
+
+  app.AppState.anagrafica.sindacato = 'si';
+  assert.equal(app.generaCedolino(2026, 2).sindacato, app.AppState.tabelle.sindacatoMensile);
+
+  app.AppState.anagrafica.sindacato = 'SIULP'; // vecchio dato testuale pre-esistente
+  assert.equal(app.generaCedolino(2026, 2).sindacato, app.AppState.tabelle.sindacatoMensile, 'un vecchio nome sindacale salvato deve continuare a contare come iscritto');
+});
+
 test('generaCedolino: il netto è sempre inferiore al lordo quando ci sono trattenute', () => {
   const app = caricaApp();
   configuraAppBase(app);

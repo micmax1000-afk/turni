@@ -1,5 +1,13 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
+// Il campo era in passato un testo libero (es. "SIULP"): qualunque valore salvato in precedenza
+// diverso da "no" viene interpretato come iscrizione attiva, per non perdere il dato di chi
+// l'aveva già compilato prima che diventasse un semplice Sì/No.
+function normalizzaSindacato(valoreSalvato){
+  if(!valoreSalvato) return 'no';
+  return valoreSalvato === 'no' ? 'no' : 'si';
+}
+
 function puntiStella(cx, cy, rEst, rInt){
   let punti = [];
   for(let i = 0; i < 10; i++){
@@ -49,7 +57,7 @@ function popolaFormAnagrafica(){
     el('campoAddComunale').value = AppState.anagrafica.addComunale ?? 0.8;
     el('campoConiugeACarico').value = AppState.anagrafica.coniugeACarico || 'no';
     el('campoFigliOver21').value = AppState.anagrafica.figliOver21 ?? 0;
-    el('campoSindacato').value = AppState.anagrafica.sindacato || '';
+    el('campoSindacato').value = normalizzaSindacato(AppState.anagrafica.sindacato);
   }
   aggiornaVisualizzazioneParametro();
   aggiornaProfiloAnagrafica();
@@ -75,7 +83,7 @@ function aggiornaProfiloAnagrafica(){
   const comune = a.comune || el('campoComune')?.value || '';
   const coniuge = (a.coniugeACarico || el('campoConiugeACarico')?.value) === 'si';
   const over = Number(a.figliOver21 ?? el('campoFigliOver21')?.value) || 0;
-  const sindacato = a.sindacato || el('campoSindacato')?.value || '';
+  const sindacato = normalizzaSindacato(a.sindacato ?? el('campoSindacato')?.value) === 'si';
   const required = [qualifica, sede !== 'Sede non impostata' ? sede : '', anni > 0 ? anni : '', regione, comune];
   const complete = Math.round((required.filter(Boolean).length / required.length) * 100);
   const initials = qualifica.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'AG';
@@ -104,7 +112,7 @@ function cancellaAnagrafica(){
   el('campoAddComunale').value = 0.8;
   el('campoConiugeACarico').value = 'no';
   el('campoFigliOver21').value = 0;
-  el('campoSindacato').value = '';
+  el('campoSindacato').value = 'no';
   aggiornaVisualizzazioneParametro();
   aggiornaRiassuntoAnagrafica();
   aggiornaProfiloAnagrafica();
