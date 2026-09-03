@@ -30,6 +30,18 @@ test('classificaTurno + totaleStraordinario: 6h base + 3h straordinario — regr
   assert.equal(totaleGiorno, 9, 'il totale giorno deve essere 9 (6+3), non 12 (doppio conteggio)');
 });
 
+test('classificaTurno: rientro pomeridiano (turno spezzato) conta come ore ordinarie, non straordinario — regressione', () => {
+  // Bug reale segnalato dall'utente: sulla "settimana corta" (mattina + rientro pomeridiano),
+  // le ore del rientro finivano nei totali di straordinario invece che in quelle ordinarie,
+  // nonostante il rientro sia parte del normale orario contrattuale della giornata.
+  const app = caricaApp();
+  const turno = { data: '2026-09-02', oraInizio: '08:00', oraFine: '14:00', secondoAttivo: true, secondoOraInizio: '15:00', secondoOraFine: '18:00' };
+  const c = app.classificaTurno(turno);
+  assert.equal(c.oreTotali, 9, '6h mattina + 3h rientro = 9h totali');
+  assert.equal(c.ordinarie, 9, 'tutte le 9 ore devono essere ordinarie');
+  assert.equal(app.totaleStraordinario(c), 0, 'il rientro non deve mai generare straordinario');
+});
+
 test('classificaTurno: turno notturno che attraversa la mezzanotte', () => {
   const app = caricaApp();
   const turno = { data: '2026-08-27', oraInizio: '19:00', oraFine: '01:00' };

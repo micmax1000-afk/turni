@@ -144,28 +144,32 @@ function classificaTurno(t){
   // si SOMMANO alle ore lavorate pagate normali (non sono straordinario, sono ore ordinarie recuperate).
   const recuperoPBCalc = t.recuperoPermessoBreveAttivo ? finestraDaOrari(t.data, t.recuperoPermessoBreveOraInizio, t.recuperoPermessoBreveOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
   const frpb = recuperoPBCalc.classificazione;
-  baseNetta.ordinarie = round2(baseNetta.ordinarie + frpb.ordinarie);
-  baseNetta.notturne = round2(baseNetta.notturne + frpb.notturne);
-  baseNetta.festive = round2(baseNetta.festive + frpb.festive);
-  baseNetta.domenicali = round2(baseNetta.domenicali + frpb.domenicali);
-  baseNetta.notturneFestive = round2(baseNetta.notturneFestive + frpb.notturneFestive);
-  baseNetta.serali = round2(baseNetta.serali + frpb.serali);
 
-  // Straordinario prima/dopo: finestre orarie indipendenti (dalle-alle), come il rientro.
-  // Un'eventuale pausa fra lo straordinario e il turno principale non viene conteggiata in alcuna categoria.
+  // Secondo segmento (rientro/turno spezzato con pausa): orario proprio, non contiguo al turno principale.
+  // È parte del normale orario contrattuale della giornata (es. mattina + rientro pomeridiano nella
+  // "settimana corta"), NON straordinario: le sue ore si sommano quindi alle ore ordinarie, esattamente
+  // come il recupero permesso breve sopra — non vanno mai nei totali di straordinario più sotto.
+  const secondoCalc = t.secondoAttivo ? finestraDaOrari(t.data, t.secondoOraInizio, t.secondoOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
+  const finestraSecondo = secondoCalc.classificazione, oreSecondo = secondoCalc.ore;
+
+  baseNetta.ordinarie = round2(baseNetta.ordinarie + frpb.ordinarie + finestraSecondo.ordinarie);
+  baseNetta.notturne = round2(baseNetta.notturne + frpb.notturne + finestraSecondo.notturne);
+  baseNetta.festive = round2(baseNetta.festive + frpb.festive + finestraSecondo.festive);
+  baseNetta.domenicali = round2(baseNetta.domenicali + frpb.domenicali + finestraSecondo.domenicali);
+  baseNetta.notturneFestive = round2(baseNetta.notturneFestive + frpb.notturneFestive + finestraSecondo.notturneFestive);
+  baseNetta.serali = round2(baseNetta.serali + frpb.serali + finestraSecondo.serali);
+
+  // Straordinario prima/dopo: finestre orarie indipendenti (dalle-alle), veri prolungamenti extra
+  // del turno (non contrattuali), a differenza del rientro sopra.
   const primaCalc = finestraDaOrari(t.data, t.straordinarioPrimaInizio, t.straordinarioPrimaFine);
   const dopoCalc = finestraDaOrari(t.data, t.straordinarioDopoInizio, t.straordinarioDopoFine);
   const finestraPrima = primaCalc.classificazione, finestraDopo = dopoCalc.classificazione;
   const strPrimaOre = primaCalc.ore, strDopoOre = dopoCalc.ore;
 
-  // Secondo segmento (rientro/turno spezzato con pausa): orario proprio, non contiguo al turno principale.
-  const secondoCalc = t.secondoAttivo ? finestraDaOrari(t.data, t.secondoOraInizio, t.secondoOraFine) : { ore:0, classificazione:{ ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0 } };
-  const finestraSecondo = secondoCalc.classificazione, oreSecondo = secondoCalc.ore;
-
-  const strDiurno = round2(finestraPrima.ordinarie + finestraDopo.ordinarie + finestraSecondo.ordinarie);
-  const strNotturno = round2(finestraPrima.notturne + finestraDopo.notturne + finestraSecondo.notturne);
-  const strFestivo = round2(finestraPrima.festive + finestraPrima.domenicali + finestraDopo.festive + finestraDopo.domenicali + finestraSecondo.festive + finestraSecondo.domenicali);
-  const strNotturnoFestivo = round2(finestraPrima.notturneFestive + finestraDopo.notturneFestive + finestraSecondo.notturneFestive);
+  const strDiurno = round2(finestraPrima.ordinarie + finestraDopo.ordinarie);
+  const strNotturno = round2(finestraPrima.notturne + finestraDopo.notturne);
+  const strFestivo = round2(finestraPrima.festive + finestraPrima.domenicali + finestraDopo.festive + finestraDopo.domenicali);
+  const strNotturnoFestivo = round2(finestraPrima.notturneFestive + finestraDopo.notturneFestive);
 
   // Se lo straordinario del giorno è convertito in riposo compensativo, non entra nel calcolo della paga:
   // le ore restano tracciate a parte (oreCompensate) invece di alimentare le categorie retribuite.
@@ -760,8 +764,6 @@ function aggiornaDettaglioGiorno(){
     sempre.innerHTML = `<div class="giorno-vuoto-card"><span class="giorno-vuoto-icona">⚠</span><div><strong>Turno incompleto</strong><span>Inserisci ora di inizio e fine per completare la giornata.</span></div></div>`;
     corpo.innerHTML = '';
   }
-  el('btnCopiaTurno').disabled = !t;
-  el('btnIncollaTurno').disabled = !turnoCopiato;
   el('campoNotaGiorno').value = AppState.noteGiorni[giornoSelezionato] || '';
 }
 

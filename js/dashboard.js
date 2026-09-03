@@ -112,7 +112,7 @@ function renderOperativoDashboard(){
   const cal = el('btnDashboardCalendario');
   if(mod) mod.onclick=()=>{
     meseCorrente=now.getMonth(); annoCorrente=now.getFullYear(); giornoSelezionato=isoOggi; renderCalendario();
-    const fab=el('btnFabTurno'); if(fab) fab.click();
+    const btn=el('btnApriModificaGiorno'); if(btn) btn.click();
   };
   if(cal) cal.onclick=()=>{
     meseCorrente=now.getMonth(); annoCorrente=now.getFullYear(); giornoSelezionato=isoOggi; renderCalendario();

@@ -1274,7 +1274,7 @@ h3{ font-family: var(--font-display); font-weight:600; }
 /* V42 — azioni rapide calendario e sequenza nelle impostazioni */
 .azioni-calendario-rapide{margin:10px 0 12px;padding:12px;border:1px solid var(--bordo,#d9dce5);border-radius:14px;background:var(--superficie,#fff)}
 .azioni-calendario-header{margin-bottom:9px}.azioni-calendario-header strong{display:block;font-size:.96rem}.azioni-calendario-header span{display:block;margin-top:3px;font-size:.78rem;opacity:.72}
-.azioni-calendario-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}.azioni-calendario-grid .campo-modale{margin:0}.azioni-calendario-rapide select{width:100%}.azioni-calendario-rapide .btn-cancella-turni{margin-top:10px}.impostazioni-sottosezione{margin-top:12px}#sezioneSequenzaHost #sezioneSequenza{margin-top:12px}
+.azioni-calendario-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}.azioni-calendario-grid .campo-modale{margin:0}.azioni-calendario-rapide select{width:100%}.azioni-calendario-rapide .btn-cancella-turni{margin-top:10px}.azioni-calendario-rapide .btn-modifica-giorno-selezionato{margin-top:8px;width:100%}.impostazioni-sottosezione{margin-top:12px}#sezioneSequenzaHost #sezioneSequenza{margin-top:12px}
 @media (max-width:650px){.azioni-calendario-grid{grid-template-columns:1fr}}
 
 

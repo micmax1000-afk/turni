@@ -208,6 +208,7 @@ function aggiornaAnteprima(){
 function apriModaleTurno(iso){
   giornoSelezionato = iso;
   const t = AppState.turni[iso] || {};
+  el('pannelloTurno').dataset.iso = iso;
   el('titoloModaleTurno').textContent = 'Turno del ' + iso.split('-').reverse().join('/');
   el('campoModelloTurno').value = '';
   el('campoRiposo').checked = !!t.riposo;

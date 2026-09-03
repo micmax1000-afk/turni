@@ -445,7 +445,14 @@ function inizializza(){
       el('azioneRapidaCalendario').value = '';
       return;
     }
-    apriModaleTurno(giornoSelezionato);
+    // Se il pannello è già aperto per QUESTO STESSO giorno, NON lo riapriamo: apriModaleTurno
+    // ricarica tutti i campi dal salvato, cancellando silenziosamente ogni casella già spuntata
+    // ma non ancora confermata con "Salva turno" — bug segnalato dall'utente selezionando più
+    // indennità extra di seguito (es. Missione poi Buono pasto: la seconda azzerava la prima).
+    // Se invece il pannello è aperto per un giorno diverso, va ricaricato normalmente.
+    const pannello = el('pannelloTurno');
+    const pannelloGiaApertoPerQuestoGiorno = !pannello.hidden && pannello.dataset.iso === giornoSelezionato;
+    if(!pannelloGiaApertoPerQuestoGiorno) apriModaleTurno(giornoSelezionato);
     const setCheck = (id, value=true) => { const x=el(id); if(x) x.checked=value; };
     if(azione.startsWith('assenza:')){
       const id = azione.slice(8);
@@ -569,8 +576,6 @@ function inizializza(){
     );
   });
 
-  el('btnCopiaTurno').addEventListener('click', copiaTurnoCorrente);
-  el('btnIncollaTurno').addEventListener('click', incollaTurnoCorrente);
   el('btnCancellaTurniMese').addEventListener('click', cancellaTurniMese);
   el('btnCancellaStorico').addEventListener('click', cancellaStorico);
 
@@ -782,7 +787,7 @@ function inizializza(){
   on('btnStatistiche','click', () => mostraScheda('statistiche'));
 
 
-  el('btnFabTurno').addEventListener('click', () => {
+  el('btnApriModificaGiorno').addEventListener('click', () => {
     if(giornoSelezionato) apriModaleTurno(giornoSelezionato);
   });
 

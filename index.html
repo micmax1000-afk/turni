@@ -131,6 +131,7 @@
         </label>
       </div>
       <button class="btn-secondario btn-cancella-turni" id="btnCancellaTurniMese" type="button">🗑️ Cancella turni del mese</button>
+      <button class="btn-primario btn-modifica-giorno-selezionato" id="btnApriModificaGiorno" type="button">✏️ Modifica turno del giorno selezionato</button>
     </div>
 
     <div class="dettaglio-giorno" id="dettaglioGiorno">
@@ -139,10 +140,6 @@
           <span class="dettaglio-giorno-titolo" id="dettaglioGiornoTitolo">Seleziona un giorno</span>
           <span class="dettaglio-giorno-freccia" aria-hidden="true">▾</span>
         </button>
-        <div class="dettaglio-giorno-azioni">
-          <button class="btn-mini-icona" id="btnCopiaTurno" title="Copia questo turno" aria-label="Copia questo turno" disabled>📄</button>
-          <button class="btn-mini-icona" id="btnIncollaTurno" title="Incolla turno copiato" aria-label="Incolla turno copiato" disabled>📌</button>
-        </div>
       </div>
       <div class="dettaglio-giorno-sempre" id="dettaglioGiornoSempre"></div>
       <div class="dettaglio-giorno-collassabile" id="dettaglioGiornoCollassabile" hidden>
@@ -174,8 +171,6 @@
         <div><span>⚡ Extra</span><strong id="v45RtExtra">0</strong></div>
       </div>
     </div>
-
-    <button class="fab-aggiungi" id="btnFabTurno" type="button" aria-label="Aggiungi o modifica turno del giorno selezionato">+</button>
 
     <div class="pannello-turno-inline" id="pannelloTurno" hidden>
       <div class="pannello-turno-header"><h2 id="titoloModaleTurno">Turno del giorno</h2><button class="btn-icona" id="btnChiudiTurno" aria-label="Chiudi">✕</button></div>
@@ -258,6 +253,7 @@
           </div>
 
           <div class="griglia-check">
+            <p class="sotto-titolo" style="grid-column:1/-1; margin:8px 0 -2px; font-weight:700; color:var(--inchiostro);">🍽️ Servizi e indennità extra del giorno</p>
             <label class="campo-modale campo-riga"><input type="checkbox" id="campoReperibilita"> Reperibilità</label>
             <label class="campo-modale campo-riga"><input type="checkbox" id="campoMissione"> Missione</label>
             <label class="campo-modale campo-riga"><input type="checkbox" id="campoServizioEsterno"> Servizio esterno</label>
@@ -609,10 +605,14 @@
         <div class="generatore-campo">
           <label class="campo-modale">🔄 Quale turnazione?
             <select id="selettoreModelloSemplice">
-              <option value="quinta">Turno in quinta — Sera · Pomeriggio · Mattina · Notte · Riposo</option>
-              <option value="quinta10">Turno in quinta 10 giorni — Sera · Pomeriggio · Mattina · Notte · Riposo · Sera · Pomeriggio · Mattina · Mattina · Riposo</option>
-              <option value="corta">Settimana corta — Lun–Ven 08:00–14:00</option>
-              <option value="lunga">Settimana lunga — Lun–Sab 08:00–14:00</option>
+              <optgroup label="Turno in quinta (a rotazione)">
+                <option value="quinta">Turno in quinta — Sera · Pomeriggio · Mattina · Notte · Riposo</option>
+                <option value="quinta10">Turno in quinta 10 giorni — Sera · Pomeriggio · Mattina · Notte · Riposo · Sera · Pomeriggio · Mattina · Mattina · Riposo</option>
+              </optgroup>
+              <optgroup label="Settimana fissa (ufficio)">
+                <option value="corta">Settimana corta — Lun–Ven 08:00–14:00</option>
+                <option value="lunga">Settimana lunga — Lun–Sab 08:00–14:00</option>
+              </optgroup>
               <option value="personalizzata">Personalizzata — la imposto io</option>
             </select>
           </label>
@@ -651,32 +651,32 @@
         <div id="anteprimaSequenzaSemplice" class="anteprima-turnazione-lista"></div>
       </div>
 
+      <details class="opzioni-avanzate-sequenza">
+        <summary>⚙️ Opzioni avanzate — personalizza ogni singolo giorno</summary>
+        <div class="opzioni-avanzate-corpo">
+          <p class="sotto-titolo">Carica uno schema già pronto qui sotto per modificarlo giorno per giorno (orari, straordinario, rientro, missione, reperibilità...), oppure costruiscine uno da zero con "Aggiungi giorno".</p>
+          <div class="modelli-nascosti">
+            <button class="btn-secondario" id="btnModelloTurnoInQuinta" type="button">Carica: turno in quinta</button>
+            <button class="btn-secondario" id="btnModelloSettimanaCorta" type="button">Carica: settimana corta</button>
+            <button class="btn-secondario" id="btnModelloSettimanaLunga" type="button">Carica: settimana lunga</button>
+          </div>
+          <div class="campo-modale">
+            <span>Sequenza giorno per giorno</span>
+            <div id="listaSequenza" class="lista-sequenza"></div>
+            <button class="btn-secondario" id="btnAggiungiStepSequenza" type="button">＋ Aggiungi giorno</button>
+          </div>
+        </div>
+        <div class="azioni-avanzate-fondo">
+          <button type="button" class="btn-secondario" id="btnRitornaGeneratoreV44">← Torna al generatore</button>
+        </div>
+      </details>
+
       <div class="generatore-azioni">
         <button class="btn-primario btn-genera-grande" id="btnGeneraSequenza" type="button">🚀 Genera turni</button>
         <button class="btn-secondario" id="btnContinuaSequenza" type="button">▶️ Continua da dove sei arrivato</button>
       </div>
       <p class="avviso-tabelle">⚠ Se nei giorni scelti esistono già turni, l'app ti chiederà conferma prima di sovrascriverli.</p>
     </div>
-
-    <details class="opzioni-avanzate-sequenza">
-      <summary>⚙️ Opzioni avanzate</summary>
-      <div class="opzioni-avanzate-corpo">
-        <div class="modelli-nascosti">
-          <button class="btn-secondario" id="btnModelloTurnoInQuinta" type="button">Modello: turno in quinta</button>
-          <button class="btn-secondario" id="btnModelloSettimanaCorta" type="button">Modello: settimana corta</button>
-          <button class="btn-secondario" id="btnModelloSettimanaLunga" type="button">Modello: settimana lunga</button>
-        </div>
-        <div class="campo-modale">
-          <span>Sequenza giorno per giorno</span>
-          <div id="listaSequenza" class="lista-sequenza"></div>
-          <button class="btn-secondario" id="btnAggiungiStepSequenza" type="button">＋ Aggiungi giorno</button>
-        </div>
-        <p class="sotto-titolo">Qui puoi personalizzare ogni passaggio, gli orari e le opzioni extra (rientro pomeridiano, straordinario programmato, missione, reperibilità, ecc.).</p>
-      </div>
-      <div class="azioni-avanzate-fondo">
-        <button type="button" class="btn-secondario" id="btnRitornaGeneratoreV44">← Torna al generatore</button>
-      </div>
-    </details>
   </section>
       <div id="impostazioniBackupContainer"></div>
       <div id="impostazioniBackupPanel" hidden>
