@@ -46,13 +46,15 @@ function renderSequenza(){
     const numeroAttivi = CAMPI_EXTRA_SEQUENZA.filter(c => passo.extra[c.chiave]).length;
     return `
     <div class="riga-sequenza riga-sequenza-semplice" data-indice="${i}">
-      <span class="numero-passo">${i + 1}</span>
+      <div class="riga-sequenza-header">
+        <span class="numero-passo">${i + 1}</span>
+        ${passo.tipo !== 'riposo' ? `<button class="btn-extra-sequenza" type="button" data-indice-extra="${i}" title="Opzioni avanzate per questo passaggio">⚙️${numeroAttivi > 0 ? ` ${numeroAttivi}` : ''}</button>` : ''}
+        <button class="riga-rimuovi" type="button" title="Rimuovi passaggio" aria-label="Rimuovi passaggio ${i+1}">✕</button>
+      </div>
       <select data-indice="${i}" data-campo="tipo" aria-label="Turno del giorno ${i+1}">
         ${Object.entries(OPZIONI_SEQUENZA_SEMPLICE).map(([val, etichetta]) =>
           `<option value="${val}" ${val === passo.tipo ? 'selected' : ''}>${etichetta}</option>`).join('')}
       </select>
-      ${passo.tipo !== 'riposo' ? `<button class="btn-extra-sequenza" type="button" data-indice-extra="${i}" title="Opzioni avanzate per questo passaggio">⚙️${numeroAttivi > 0 ? ` ${numeroAttivi}` : ''}</button>` : ''}
-      <button class="riga-rimuovi" type="button" title="Rimuovi passaggio" aria-label="Rimuovi passaggio ${i+1}">✕</button>
     </div>
     ${passo.tipo === 'personalizzato' ? `
     <div class="riga-sequenza-orari riga-sequenza-orari-semplice">

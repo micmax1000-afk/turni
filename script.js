@@ -532,10 +532,23 @@ function inizializza(){
     }
   });
 
+  function aggiornaVisibilitaFasciaOrariaSemplice(){
+    const scelta = el('selettoreModelloSemplice')?.value;
+    const contenitore = el('contenitoreFasciaOrariaSemplice');
+    if(!contenitore) return;
+    // La fascia oraria si applica solo ai modelli a orario fisso (settimana corta/lunga):
+    // il turno in quinta ha orari propri già fissi (Sera/Pomeriggio/Mattina/Notte) e la
+    // modalità personalizzata si gestisce dalle Opzioni avanzate — in entrambi i casi il
+    // selettore non avrebbe alcun effetto, quindi lo nascondiamo per non creare confusione.
+    contenitore.hidden = (scelta !== 'corta' && scelta !== 'lunga');
+  }
+
   on('selettoreModelloSemplice','change',()=>{
     const scelta=el('selettoreModelloSemplice')?.value;
+    aggiornaVisibilitaFasciaOrariaSemplice();
     if(scelta!=='personalizzata') aggiornaAnteprimaSequenzaSemplice();
   });
+  aggiornaVisibilitaFasciaOrariaSemplice();
 
   function aggiornaGiorniDaPreset(){
     const preset = el('campoSequenzaDurataPreset').value;
