@@ -90,10 +90,12 @@
       <div class="azioni-calendario-header">
         <div><strong>⚡ Azioni rapide</strong><span>Filtra il calendario o prepara rapidamente un'azione per il giorno selezionato.</span></div>
       </div>
-      <label class="campo-modale campo-ricerca-note">🔎 Cerca nelle note
-        <input type="search" id="campoRicercaNoteGiorni" placeholder="Es. dentista, corso, cambio con Rossi…" autocomplete="off">
+      <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
+        <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
       </label>
-      <div id="risultatiRicercaNoteGiorni" class="risultati-ricerca-note" hidden></div>
+      <label class="campo-modale">📋 Servizio svolto
+        <input type="text" id="campoServizioSvolto" placeholder="es. Pattugliamento, Ufficio denunce, Scorta...">
+      </label>
       <div class="azioni-calendario-grid">
         <label class="campo-modale">🔎 Visualizza
           <select id="filtroCalendarioSelect">
@@ -144,9 +146,6 @@
       <div class="dettaglio-giorno-sempre" id="dettaglioGiornoSempre"></div>
       <div class="dettaglio-giorno-collassabile" id="dettaglioGiornoCollassabile" hidden>
         <div class="dettaglio-giorno-corpo" id="dettaglioGiornoCorpo"></div>
-        <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
-          <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
-        </label>
       </div>
     </div>
 
@@ -209,7 +208,6 @@
         <div id="campiOrario">
           <label class="campo-modale">Ora inizio<input type="time" id="campoOraInizio"></label>
           <label class="campo-modale">Ora fine<input type="time" id="campoOraFine"></label>
-          <label class="campo-modale">Servizio svolto<input type="text" id="campoServizioSvolto" placeholder="es. Pattugliamento, Ufficio denunce, Scorta..."></label>
 
           <label class="campo-modale campo-riga">
             <input type="checkbox" id="campoSecondoAttivo"> Rientro / turno spezzato con pausa

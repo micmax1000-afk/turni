@@ -327,6 +327,26 @@ function inizializza(){
     }, 400);
   });
 
+  // "Servizio svolto" in Azioni rapide: salvataggio indipendente (come la nota del giorno),
+  // così si può compilare senza dover aprire il pannello completo di modifica turno.
+  // Si applica solo a un giorno che ha già un turno: creare un turno "vuoto" solo per questo
+  // campo farebbe comparire l'avviso "Turno incompleto" nella card del giorno.
+  let timeoutServizioSvolto;
+  const _campoServizioSvolto = el('campoServizioSvolto');
+  if(_campoServizioSvolto) _campoServizioSvolto.addEventListener('input', () => {
+    if(!giornoSelezionato) return;
+    clearTimeout(timeoutServizioSvolto);
+    timeoutServizioSvolto = setTimeout(() => {
+      const testo = el('campoServizioSvolto').value;
+      if(!AppState.turni[giornoSelezionato]){
+        if(testo) mostraAvviso('Questo giorno non ha ancora un turno: aggiungilo prima con "✏️ Modifica turno del giorno selezionato".');
+        return;
+      }
+      AppState.turni[giornoSelezionato].servizioSvolto = testo;
+      salvaTurniStorage();
+    }, 400);
+  });
+
   if(!AppState.anagrafica) mostraScheda('anagrafica');
 
   el('btnMesePrec').addEventListener('click', () => {

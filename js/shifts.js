@@ -97,7 +97,10 @@ function leggiTurnoDalModale(){
     riposoCompensativoOraFine: el('campoRCOraFine').value,
     oraInizio: el('campoOraInizio').value,
     oraFine: el('campoOraFine').value,
-    servizioSvolto: el('campoServizioSvolto').value,
+    // "Servizio svolto" ora si modifica da Azioni rapide con salvataggio proprio indipendente
+    // (come "Nota del giorno"): qui ne preserviamo il valore già salvato, senza leggerlo da un
+    // campo del pannello che non esiste più, per non perderlo quando si salva il resto del turno.
+    servizioSvolto: (AppState.turni[giornoSelezionato] || {}).servizioSvolto || '',
     straordinarioPrimaInizio: el('campoStrPrimaInizio').value,
     straordinarioPrimaFine: el('campoStrPrimaFine').value,
     straordinarioDopoInizio: el('campoStrDopoInizio').value,
@@ -218,7 +221,6 @@ function apriModaleTurno(iso){
   el('campoRCOraFine').value = t.riposoCompensativoOraFine || '';
   el('campoOraInizio').value = t.oraInizio || '';
   el('campoOraFine').value = t.oraFine || '';
-  el('campoServizioSvolto').value = t.servizioSvolto || '';
   el('campoStrPrimaInizio').value = t.straordinarioPrimaInizio || '';
   el('campoStrPrimaFine').value = t.straordinarioPrimaFine || '';
   el('campoStrDopoInizio').value = t.straordinarioDopoInizio || '';
