@@ -72,6 +72,20 @@ test('classificaTurno: stesso orario di inizio e fine viene interpretato come tu
   assert.equal(c.oreTotali, 24);
 });
 
+test('calcolaFineAssolutaTurno: calcola correttamente l\'istante di fine, anche a cavallo di mezzanotte', () => {
+  // Base per la regressione "prossimo turno mostra un turno già concluso di oggi":
+  // verifica che il calcolo dell'istante di fine sia corretto sia per turni nello stesso
+  // giorno sia per turni che sconfinano nel giorno successivo (es. 19:00-01:00).
+  const app = caricaApp();
+  const fineStessoGiorno = app.calcolaFineAssolutaTurno('2026-09-03', '07:00', '13:00');
+  assert.equal(fineStessoGiorno.getDate(), 3);
+  assert.equal(fineStessoGiorno.getHours(), 13);
+
+  const fineGiornoSuccessivo = app.calcolaFineAssolutaTurno('2026-09-03', '19:00', '01:00');
+  assert.equal(fineGiornoSuccessivo.getDate(), 4, 'un turno 19:00-01:00 finisce il giorno dopo');
+  assert.equal(fineGiornoSuccessivo.getHours(), 1);
+});
+
 test('categoriaTurno: riconosce correttamente mattina/pomeriggio/sera/notte', () => {
   const app = caricaApp();
   assert.equal(app.categoriaTurno('07:00', '13:00', '2026-08-27'), 'mattina');

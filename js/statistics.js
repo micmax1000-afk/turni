@@ -46,7 +46,7 @@ function renderStatistiche(){
     <div class="stat-panel-v17"><h3>🕐 Ore lavorate</h3>${righeOre}</div>
     <div class="stat-panel-v17"><h3>⏱️ Straordinario per mese</h3>${righeStra}</div>
     <div class="stat-panel-v17"><h3>💶 Netto registrato</h3>${righeNet}</div>
-    <div class="stat-panel-v17 stat-dettagli"><h3>Riepilogo</h3><div><span>🌙 Riposi</span><strong>${s.riposi}</strong></div><div><span>🛰️ Reperibilità</span><strong>${s.reperibilita}</strong></div><div><span>🚗 Servizio esterno</span><strong>${s.servizioEsterno}</strong></div><div><span>🛡️ Ordine pubblico</span><strong>${s.ordinePubblico}</strong></div><div><span>💶 Lordo registrato</span><strong>${euroFmt(s.lordo)}</strong></div></div>
+    <div class="stat-panel-v17 stat-dettagli"><h3>Riepilogo</h3><div><span>💤 Riposi</span><strong>${s.riposi}</strong></div><div><span>🛰️ Reperibilità</span><strong>${s.reperibilita}</strong></div><div><span>🚗 Servizio esterno</span><strong>${s.servizioEsterno}</strong></div><div><span>🛡️ Ordine pubblico</span><strong>${s.ordinePubblico}</strong></div><div><span>💶 Lordo registrato</span><strong>${euroFmt(s.lordo)}</strong></div></div>
     <div class="stat-panel-v17"><h3>📋 Dettaglio mensile</h3><div class="stat-tabella-scroll"><table class="stat-tabella"><thead><tr><th>Mese</th><th>Ore</th><th>Turni</th><th>Assenze</th><th>Str.</th><th>Netto</th></tr></thead><tbody>${s.mesi.map(x=>`<tr><td>${NOMI_MESI[x.mese-1]}</td><td>${x.ore?oreFmt(x.ore):'—'}</td><td>${x.turni||'—'}</td><td>${x.assenze||'—'}</td><td>${x.straordinario?oreFmt(x.straordinario):'—'}</td><td>${x.netto?euroFmt(x.netto):'—'}</td></tr>`).join('')}</tbody></table></div></div>
   </div>`;
 }

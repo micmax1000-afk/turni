@@ -382,11 +382,22 @@ else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); iniz
 function aggiornaProssimoTurno(){
   const widget = el('prossimoTurnoWidget');
   if(!widget) return;
+  const adesso = new Date();
   const oggi = new Date(); oggi.setHours(0,0,0,0);
   const isoOggi = dataISO(oggi);
-  // Cerchiamo, tra tutti i turni salvati, il primo giorno di lavoro effettivo (oraInizio/oraFine) da oggi in avanti.
+  // Cerchiamo, tra tutti i turni salvati, il primo giorno di lavoro effettivo (oraInizio/oraFine)
+  // il cui orario di FINE non sia già passato — non basta guardare la data: un turno di oggi già
+  // concluso (es. 07:00-13:00 controllato alle 20:00) non è più "il prossimo", è già trascorso.
   const chiaviFuture = Object.keys(AppState.turni)
-    .filter(iso => iso >= isoOggi && AppState.turni[iso] && AppState.turni[iso].oraInizio && AppState.turni[iso].oraFine && !AppState.turni[iso].riposo && !AppState.turni[iso].assenzaTipo)
+    .filter(iso => {
+      const t = AppState.turni[iso];
+      if(iso < isoOggi || !t || !t.oraInizio || !t.oraFine || t.riposo || t.assenzaTipo) return false;
+      if(iso > isoOggi) return true; // giorno futuro: nessun controllo sull'orario necessario
+      // iso === isoOggi: verifichiamo che l'orario di fine (gestendo anche i turni a cavallo di
+      // mezzanotte, es. 19:00-01:00) non sia già passato rispetto ad adesso.
+      const fine = calcolaFineAssolutaTurno(iso, t.oraInizio, t.oraFine);
+      return fine > adesso;
+    })
     .sort();
   widget.hidden = false;
   if(!chiaviFuture.length){
@@ -403,10 +414,22 @@ function aggiornaProssimoTurno(){
   const diffGiorni = Math.round((d - oggi) / 86400000);
   const quando = diffGiorni === 0 ? 'oggi' : diffGiorni === 1 ? 'domani' : `tra ${diffGiorni} giorni`;
   const nomeCategoria = categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'sera' ? 'Sera' : 'Mattina';
-  el('prossimoTurnoIcona').textContent = ICONA_CATEGORIA[categoria] || '☀️';
+  el('prossimoTurnoIcona').innerHTML = svgIconaMomento(categoria);
   el('prossimoTurnoLabel').textContent = `${nomeCategoria} — ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
   el('prossimoTurnoOrario').textContent = `${t.oraInizio} → ${t.oraFine}`;
   const pillQuando = el('prossimoTurnoQuando'); pillQuando.hidden = false; pillQuando.textContent = quando;
+}
+
+// Calcola l'istante assoluto di fine di un turno dato (data + orari), gestendo il caso in cui
+// il turno attraversi la mezzanotte (fine <= inizio => la fine cade il giorno successivo).
+// Stessa logica già usata in classificaTurno, isolata qui per essere riusabile.
+function calcolaFineAssolutaTurno(iso, oraInizio, oraFine){
+  const [hi, mi] = oraInizio.split(':').map(Number);
+  const [hf, mf] = oraFine.split(':').map(Number);
+  const inizio = new Date(iso + 'T00:00:00'); inizio.setHours(hi, mi, 0, 0);
+  const fine = new Date(iso + 'T00:00:00'); fine.setHours(hf, mf, 0, 0);
+  if(fine <= inizio) fine.setDate(fine.getDate() + 1);
+  return fine;
 }
 
 function renderCalendario(){
@@ -686,7 +709,7 @@ function aggiornaDettaglioGiorno(){
     if(t.reperibilita) badges.push('<span class="dettaglio-pill pill-reperibilita">★ Reperibilità</span>');
     sempre.innerHTML = `
       <div class="dettaglio-hero dettaglio-hero-${escapeHtml(categoria || 'turno')}">
-        <div class="dettaglio-hero-badge">${ICONA_CATEGORIA[categoria] || escapeHtml(etichetta)}</div>
+        <div class="dettaglio-hero-badge">${svgIconaMomento(categoria)}</div>
         <div><strong>${escapeHtml(categoria === 'notte' ? 'Notte' : categoria === 'pomeriggio' ? 'Pomeriggio' : categoria === 'mattina' ? 'Mattina' : categoria === 'sera' ? 'Sera' : 'Turno')} (${formatOreMinuti(oreOrdinarie)})</strong><span>🕐 ${escapeHtml(t.oraInizio)} – ${escapeHtml(t.oraFine)}</span></div>
       </div>
       ${badges.length ? `<div class="dettaglio-pills">${badges.join('')}</div>` : ''}
@@ -731,6 +754,33 @@ const MODELLI_TURNO = {
 const INIZIALE_CATEGORIA = { mattina:'Mattina', pomeriggio:'Pomeriggio', sera:'Sera', notte:'Notte', riposo:'Riposo' };
 const CODICE_CATEGORIA = { mattina:'M', pomeriggio:'P', sera:'S', notte:'N', riposo:'R' };
 const ICONA_CATEGORIA = { mattina:'☀️', pomeriggio:'🌤️', sera:'🌇', notte:'🌙', riposo:'💤', assenza:'🏖️' };
+
+// Icone illustrate "a cartolina" per i 4 momenti della giornata (mattina/pomeriggio/sera/notte),
+// nello stile richiesto: quadrato arrotondato, cielo colorato, sole/luna, collinette e un albero.
+// Usabili solo dove il markup consente HTML (innerHTML) — un <select><option> nativo può
+// contenere solo testo semplice per limite del browser, quindi lì restano le emoji di ICONA_CATEGORIA.
+function svgIconaMomento(categoria){
+  const varianti = {
+    mattina:    { bg:'#BFE3F5', cielo:'#FDEFC7', astro:'#FFD966' },
+    pomeriggio: { bg:'#FCE38A', cielo:'#FCE38A', astro:'#FFF275' },
+    sera:       { bg:'#F6C9D8', cielo:'#F3A6C0', astro:'#FF8A65' },
+    notte:      { bg:'#7A5FBF', cielo:'#5B45A0', astro:'#EDE4B0' }
+  };
+  const v = varianti[categoria] || varianti.mattina;
+  const isNotte = categoria === 'notte';
+  const astro = isNotte
+    ? `<circle cx="66" cy="28" r="13" fill="${v.astro}"/><circle cx="61" cy="24" r="11" fill="${v.bg}"/>`
+    : `<circle cx="50" cy="30" r="15" fill="${v.astro}"/>`;
+  return `<svg viewBox="0 0 100 100" width="26" height="26" aria-hidden="true" style="display:block;border-radius:22%;overflow:hidden;flex-shrink:0">
+    <rect width="100" height="100" fill="${v.bg}"/>
+    <rect width="100" height="62" fill="${v.cielo}"/>
+    ${astro}
+    <path d="M0,70 Q25,52 50,70 T100,68 V100 H0 Z" fill="#3E7A46"/>
+    <path d="M0,80 Q25,62 55,80 T100,76 V100 H0 Z" fill="#57A15F"/>
+    <circle cx="33" cy="56" r="9" fill="#2F6B3A"/>
+    <rect x="30" y="61" width="6" height="12" fill="#6B4A2E"/>
+  </svg>`;
+}
 
 // Icona specifica per tipo di assenza, riconosciuta dal nome (case-insensitive, per parola chiave)
 // così funziona anche con piccole varianti di formulazione. Le voci personalizzate non riconosciute

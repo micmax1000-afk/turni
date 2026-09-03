@@ -217,7 +217,7 @@ function aggiornaRiepilogoVisualeMese(){
     ['🕐', formatOreDashboard(totaleOre), 'Ore totali', 'ore'],
     ['📅', String(lavorati), 'Turni', 'turni'],
     ['⏱', formatOreDashboard(straordinario), 'Straordinario', 'straordinario'],
-    ['🌙', String(riposi), 'Riposi', 'riposi'],
+    ['💤', String(riposi), 'Riposi', 'riposi'],
     ['A', String(assenze), 'Assenze', 'assenze'],
     ['◆', String(missioni), 'Missioni', 'missioni']
   ];

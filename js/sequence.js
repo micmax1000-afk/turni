@@ -1,11 +1,11 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
 const OPZIONI_SEQUENZA_SEMPLICE = {
-  riposo: '🌙 Riposo',
+  riposo: '💤 Riposo',
   mattina: '☀️ Mattina — 07:00–13:00',
   pomeriggio: '🌤️ Pomeriggio — 13:00–19:00',
-  sera24: '🌆 Sera — 19:00–24:00',
-  sera01: '🌆 Sera — 19:00–01:00',
+  sera24: '🌇 Sera — 19:00–24:00',
+  sera01: '🌇 Sera — 19:00–01:00',
   notte00: '🌙 Notte — 00:00–07:00',
   notte01: '🌙 Notte — 01:00–07:00',
   mattutino: '☀️ Turno — 08:00–14:00',
@@ -14,12 +14,27 @@ const OPZIONI_SEQUENZA_SEMPLICE = {
 };
 
 function descrizionePassoSemplice(passo){
-  if(!passo || passo.tipo === 'riposo') return '🌙 Riposo';
+  if(!passo || passo.tipo === 'riposo') return '💤 Riposo';
   if(passo.tipo === 'personalizzato'){
     const a=passo.oraInizio||'--:--', b=passo.oraFine||'--:--';
     return `🕐 Personalizzato — ${a}–${b}`;
   }
-  return OPZIONI_SEQUENZA_SEMPLICE[passo.tipo] || OPZIONI_SEQUENZA[passo.tipo] || passo.tipo;
+  const etichetta = OPZIONI_SEQUENZA_SEMPLICE[passo.tipo] || OPZIONI_SEQUENZA[passo.tipo] || passo.tipo;
+  // Mostriamo l'icona illustrata al posto della semplice emoji per i 4 momenti della giornata
+  // (qui il contesto è innerHTML, quindi può ospitare SVG — a differenza dei <select><option>
+  // dei menu a tendina, che per limite del browser possono contenere solo testo semplice).
+  const mappaMomento = {
+    mattina:'mattina', mattutino:'mattina',
+    pomeriggio:'pomeriggio', pomeridiano:'pomeriggio',
+    sera24:'sera', sera01:'sera',
+    notte00:'notte', notte01:'notte'
+  };
+  const momento = mappaMomento[passo.tipo];
+  if(momento && typeof svgIconaMomento === 'function'){
+    const testoSenzaEmoji = etichetta.replace(/^\S+\s*/, '');
+    return `<span style="display:inline-flex;align-items:center;gap:7px;">${svgIconaMomento(momento)}<span>${testoSenzaEmoji}</span></span>`;
+  }
+  return etichetta;
 }
 
 function aggiornaAnteprimaSequenzaSemplice(){
