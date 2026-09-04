@@ -350,6 +350,14 @@ function inizializza(){
 
   if(!AppState.anagrafica) mostraScheda('anagrafica');
 
+  // Scorciatoie dell'app (icona tenuta premuta sulla home, definite in manifest.json → shortcuts):
+  // se l'anagrafica manca, resta prioritario chiederla prima di qualunque altra schermata.
+  const scorciatoia = new URLSearchParams(window.location.search).get('scorciatoia');
+  if(scorciatoia && AppState.anagrafica){
+    if(scorciatoia === 'sequenza') setTimeout(() => el('settingsSequenza')?.click(), 50);
+    else if(scorciatoia === 'cedolino') mostraScheda('cedolino');
+  }
+
   el('btnMesePrec').addEventListener('click', () => {
     meseCorrente--; if(meseCorrente < 0){ meseCorrente = 11; annoCorrente--; }
     renderCalendario();
