@@ -80,3 +80,22 @@ test('calcolaOreDaRecuperareAnno: differenza fra permesso breve preso e già rec
   app.AppState.turni['2026-03-03'] = { data: '2026-03-03', recuperoPermessoBreveAttivo: true, recuperoPermessoBreveOraInizio: '07:00', recuperoPermessoBreveOraFine: '10:00' }; // +3h
   assert.equal(app.calcolaOreDaRecuperareAnno(2026), 0, 'il saldo non può essere negativo anche se si è recuperato più del preso');
 });
+
+test('calcolaRiepilogoOreMese: ordine pubblico e servizio esterno selezionati insieme non accumulano due indennità — regressione', () => {
+  const app = caricaApp();
+  app.AppState.tabelle = app.clonaTabelleConSoglie(app.TurniPSData.TABELLE_PREDEFINITE);
+  app.AppState.turni = {
+    '2026-09-05': { data:'2026-09-05', oraInizio:'07:00', oraFine:'13:00', servizioEsterno:true, ordinePubblico:true, opSede:'dentro' }
+  };
+  const r = app.calcolaRiepilogoOreMese(2026, 8);
+  assert.equal(r.turniServizioEsternoValidi, 0, 'con OP spuntato insieme, il servizio esterno non deve generare una seconda indennità');
+  assert.ok(r.indennitaOPTotale > 0, 'l\'ordine pubblico deve comunque essere pagato');
+  // I conteggi informativi (quante volte hai fatto ciascuna cosa) restano entrambi corretti.
+  assert.equal(r.servizioEsterno, 1);
+  assert.equal(r.ordinePubblico, 1);
+
+  // Controllo di non-regressione: da solo, il servizio esterno continua a funzionare come prima.
+  app.AppState.turni = { '2026-09-06': { data:'2026-09-06', oraInizio:'07:00', oraFine:'13:00', servizioEsterno:true } };
+  const r2 = app.calcolaRiepilogoOreMese(2026, 8);
+  assert.equal(r2.turniServizioEsternoValidi, 1);
+});

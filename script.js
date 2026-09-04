@@ -733,6 +733,20 @@ function inizializza(){
 
   el('btnChiudiTurno').addEventListener('click', () => { el('pannelloTurno').hidden = true; });
 
+  el('btnAggiungiSecondoStraordinario').addEventListener('click', () => {
+    el('blocchStrSecondo').hidden = false;
+    el('btnAggiungiSecondoStraordinario').hidden = true;
+    el('campoStrDopoInizio')?.focus();
+    aggiornaAnteprima();
+  });
+  el('btnRimuoviSecondoStraordinario').addEventListener('click', () => {
+    el('campoStrDopoInizio').value = '';
+    el('campoStrDopoFine').value = '';
+    el('blocchStrSecondo').hidden = true;
+    el('btnAggiungiSecondoStraordinario').hidden = false;
+    aggiornaAnteprima();
+  });
+
   el('campoRiposo').addEventListener('change', () => {
     if(el('campoRiposo').checked) el('campoAssenzaTipo').value = '';
     aggiornaVisibilitaCampiOrario(); aggiornaAnteprima();
@@ -743,15 +757,6 @@ function inizializza(){
   });
   el('campoRCOraInizio').addEventListener('input', aggiornaAnteprima);
   el('campoRCOraFine').addEventListener('input', aggiornaAnteprima);
-
-  // Precompilo "alle" dello straordinario prima con l'inizio del turno (di solito coincidono),
-  // e "dalle" dello straordinario dopo con la fine del turno — solo se il campo è ancora vuoto.
-  el('campoOraInizio').addEventListener('change', () => {
-    if(!el('campoStrPrimaFine').value) el('campoStrPrimaFine').value = el('campoOraInizio').value;
-  });
-  el('campoOraFine').addEventListener('change', () => {
-    if(!el('campoStrDopoInizio').value) el('campoStrDopoInizio').value = el('campoOraFine').value;
-  });
 
   el('campoMissione').addEventListener('change', () => {
     const attiva = el('campoMissione').checked;
@@ -810,11 +815,19 @@ function inizializza(){
   });
 
   el('btnSalvaTurno').addEventListener('click', () => {
-    AppState.turni[giornoSelezionato] = leggiTurnoDalModale();
-    salvaTurniStorage();
-    el('pannelloTurno').hidden = true;
-    renderCalendario();
-    if(typeof renderStatistiche==='function' && !el('vistaStatistiche')?.hidden) renderStatistiche();
+    const nuovoTurno = leggiTurnoDalModale();
+    const salva = () => {
+      AppState.turni[giornoSelezionato] = nuovoTurno;
+      salvaTurniStorage();
+      el('pannelloTurno').hidden = true;
+      renderCalendario();
+      if(typeof renderStatistiche==='function' && !el('vistaStatistiche')?.hidden) renderStatistiche();
+    };
+    if(typeof rilevaSovrapposizioneStraordinario === 'function' && rilevaSovrapposizioneStraordinario(nuovoTurno)){
+      mostraConferma('Le ore di straordinario che hai inserito si sovrappongono all\'orario del turno svolto: rischi di contare due volte le stesse ore. Vuoi salvare comunque?', salva, 'Attenzione: orari sovrapposti');
+    } else {
+      salva();
+    }
   });
   el('tabTurni').addEventListener('click', () => mostraScheda('turni'));
   el('tabCedolino').addEventListener('click', () => mostraScheda('cedolino'));

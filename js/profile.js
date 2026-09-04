@@ -50,10 +50,7 @@ function popolaFormAnagrafica(){
   if(AppState.anagrafica){
     el('campoQualifica').value = AppState.anagrafica.qualifica || 'Agente';
     el('campoAnni').value = AppState.anagrafica.anni || '';
-    el('campoAssegnoFunzionale').value = AppState.anagrafica.assegnoFunzionale || 'no';
-    el('campoSede').value = AppState.anagrafica.sede || '';
     el('campoRegione').value = AppState.anagrafica.regione || 'Lombardia';
-    el('campoComune').value = AppState.anagrafica.comune || '';
     el('campoAddComunale').value = AppState.anagrafica.addComunale ?? 0.8;
     el('campoConiugeACarico').value = AppState.anagrafica.coniugeACarico || 'no';
     el('campoFigliOver21').value = AppState.anagrafica.figliOver21 ?? 0;
@@ -77,26 +74,24 @@ function aggiornaVisualizzazioneParametro(){
 function aggiornaProfiloAnagrafica(){
   const a = AppState.anagrafica || {};
   const qualifica = a.qualifica || el('campoQualifica')?.value || 'Agente';
-  const sede = a.sede || el('campoSede')?.value || 'Sede non impostata';
   const anni = Number(a.anni ?? el('campoAnni')?.value) || 0;
   const regione = a.regione || el('campoRegione')?.value || '—';
-  const comune = a.comune || el('campoComune')?.value || '';
   const coniuge = (a.coniugeACarico || el('campoConiugeACarico')?.value) === 'si';
   const over = Number(a.figliOver21 ?? el('campoFigliOver21')?.value) || 0;
   const sindacato = normalizzaSindacato(a.sindacato ?? el('campoSindacato')?.value) === 'si';
-  const required = [qualifica, sede !== 'Sede non impostata' ? sede : '', anni > 0 ? anni : '', regione, comune];
+  const required = [qualifica, anni > 0 ? anni : '', regione];
   const complete = Math.round((required.filter(Boolean).length / required.length) * 100);
   const initials = qualifica.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase() || 'AG';
   const avatar = el('profiloAvatar'); if(avatar) avatar.textContent = initials;
   const title = el('profiloNomeTitolo'); if(title) title.textContent = qualifica;
-  const subtitle = el('profiloSedeTitolo'); if(subtitle) subtitle.textContent = [sede, comune, regione].filter(Boolean).join(' · ');
+  const subtitle = el('profiloSedeTitolo'); if(subtitle) subtitle.textContent = regione;
   const badge = el('profiloComplete'); if(badge) badge.textContent = `${complete}%`;
   const alert = el('profiloAlert'); if(alert) alert.hidden = complete >= 80;
   const host = el('profiloSummary');
   if(host) host.innerHTML = `
     <div class="profilo-summary-card"><span>👮 Qualifica</span><strong>${qualifica}</strong><small>Parametro ${PARAMETRO_STIPENDIALE[qualifica] !== undefined ? PARAMETRO_STIPENDIALE[qualifica].toFixed(2).replace('.',',') : '—'}</small></div>
-    <div class="profilo-summary-card"><span>⌛ Servizio</span><strong>${anni ? anni + ' anni' : 'Da impostare'}</strong><small>${a.assegnoFunzionale === 'si' ? 'Assegno funzionale: sì' : 'Assegno funzionale: no'}</small></div>
-    <div class="profilo-summary-card"><span>📍 Sede</span><strong>${sede}</strong><small>${regione}</small></div>
+    <div class="profilo-summary-card"><span>⌛ Servizio</span><strong>${anni ? anni + ' anni' : 'Da impostare'}</strong><small>${anni >= 17 ? 'Assegno funzione: attivo' : 'Assegno funzione: non ancora'}</small></div>
+    <div class="profilo-summary-card"><span>📍 Regione</span><strong>${regione}</strong><small>Addizionale regionale automatica</small></div>
     <div class="profilo-summary-card"><span>👨‍👩‍👧 Famiglia</span><strong>${coniuge ? 'Coniuge + ' : ''}${over} figli over 21</strong><small>${sindacato ? 'Sindacato: presente' : 'Dati facoltativi'}</small></div>`;
 }
 
@@ -105,10 +100,7 @@ function cancellaAnagrafica(){
   TurniPSStorage.removeItem(CHIAVE_ANAGRAFICA);
   el('campoQualifica').value = 'Agente';
   el('campoAnni').value = '';
-  el('campoAssegnoFunzionale').value = 'no';
-  el('campoSede').value = '';
   el('campoRegione').value = 'Lombardia';
-  el('campoComune').value = '';
   el('campoAddComunale').value = 0.8;
   el('campoConiugeACarico').value = 'no';
   el('campoFigliOver21').value = 0;
@@ -122,10 +114,7 @@ function salvaAnagraficaDaModale(){
   AppState.anagrafica = {
     qualifica: el('campoQualifica').value,
     anni: el('campoAnni').value,
-    assegnoFunzionale: el('campoAssegnoFunzionale').value,
-    sede: el('campoSede').value,
     regione: el('campoRegione').value,
-    comune: el('campoComune').value,
     addComunale: Number(el('campoAddComunale').value) || 0,
     coniugeACarico: el('campoConiugeACarico').value,
     figliOver21: Number(el('campoFigliOver21').value) || 0,

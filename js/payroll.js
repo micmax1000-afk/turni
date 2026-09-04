@@ -1,7 +1,9 @@
 /* FASE 1 — modulo estratto dal precedente script.js. */
 
 function calcolaAssegnoFunzioneMensile(){
-  if(!AppState.anagrafica || AppState.anagrafica.assegnoFunzionale !== 'si') return 0;
+  // Spetta automaticamente a tutti al superamento della soglia di anni, senza condizioni
+  // aggiuntive: nessun interruttore manuale da attivare in Anagrafica.
+  if(!AppState.anagrafica) return 0;
   const anni = Number(AppState.anagrafica.anni) || 0;
   const cat = (MAPPA_GRADI[AppState.anagrafica.qualifica] || { cat:'truppa' }).cat;
   const s = AppState.tabelle.assegnoFunzioneAnnuo[cat] || AppState.tabelle.assegnoFunzioneAnnuo.truppa;

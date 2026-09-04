@@ -108,6 +108,35 @@ function finestraDaOrari(dataBase, oraInizioStr, oraFineStr){
   return { ore: round2(ore), classificazione: classificaFinestra(inizio, fine) };
 }
 
+// Restituisce l'intervallo assoluto {inizio, fine} di una coppia orario-inizio/orario-fine,
+// gestendo lo stesso attraversamento di mezzanotte usato altrove (fine <= inizio => giorno dopo).
+// null se manca uno dei due orari. Usata per rilevare sovrapposizioni fra finestre orarie.
+function finestraAssoluta(dataBase, oraInizioStr, oraFineStr){
+  if(!oraInizioStr || !oraFineStr) return null;
+  const [hs, ms] = oraInizioStr.split(':').map(Number);
+  const [he, me] = oraFineStr.split(':').map(Number);
+  const inizio = new Date(dataBase + 'T00:00:00'); inizio.setHours(hs, ms, 0, 0);
+  const fine = new Date(dataBase + 'T00:00:00'); fine.setHours(he, me, 0, 0);
+  if(fine <= inizio) fine.setDate(fine.getDate() + 1);
+  return { inizio, fine };
+}
+
+function finestreSovrapposte(a, b){
+  if(!a || !b) return false;
+  return a.inizio < b.fine && b.inizio < a.fine;
+}
+
+// Rileva se le finestre di straordinario (prima/dopo il turno) inserite dall'utente si
+// sovrappongono all'orario del turno principale — errore di battitura comune che farebbe
+// contare due volte le stesse ore (una come turno ordinario, una come straordinario).
+function rilevaSovrapposizioneStraordinario(t){
+  if(!t || !t.data || !t.oraInizio || !t.oraFine) return false;
+  const turno = finestraAssoluta(t.data, t.oraInizio, t.oraFine);
+  const prima = finestraAssoluta(t.data, t.straordinarioPrimaInizio, t.straordinarioPrimaFine);
+  const dopo = finestraAssoluta(t.data, t.straordinarioDopoInizio, t.straordinarioDopoFine);
+  return finestreSovrapposte(turno, prima) || finestreSovrapposte(turno, dopo);
+}
+
 function classificaTurno(t){
   const vuoto = {
     oreTotali:0, ordinarie:0, notturne:0, festive:0, domenicali:0, notturneFestive:0, serali:0,
@@ -222,7 +251,10 @@ function calcolaRiepilogoOreMese(anno, mese){
     }
     if(t.servizioEsterno){
       servizioEsterno++;
-      if((c.oreTotali || 0) >= 3) turniServizioEsternoValidi++; // richiede almeno 3 ore continuative
+      // Ordine pubblico e servizio esterno si possono selezionare insieme sullo stesso turno,
+      // ma non devono generare due indennità per lo stesso servizio: se sono spuntati entrambi,
+      // paghiamo solo l'ordine pubblico (condizioni più stringenti: minimo 4h contro le 3h qui).
+      if(!t.ordinePubblico && (c.oreTotali || 0) >= 3) turniServizioEsternoValidi++;
     }
     if(t.ordinePubblico){
       ordinePubblico++;
@@ -282,7 +314,7 @@ function categoriaFiltroCalendario(t, categoria){
   if(!t) return 'vuoto';
   if(t.assenzaTipo) return 'assenze';
   if(t.riposo) return 'riposi';
-  const extra = !!(t.missione || t.servizioEsterno || t.reperibilita || t.ordinePubblico || t.controlloTerritorio || t.buonoPasto || t.aggiornamentoProfessionale || t.addestramentoTiro || t.servizioSvolto || t.straordinarioPrimaInizio || t.straordinarioDopoInizio || t.secondoAttivo);
+  const extra = !!(t.missione || t.servizioEsterno || t.reperibilita || t.ordinePubblico || t.controlloTerritorio || t.buonoPasto || t.aggiornamentoProfessionale || t.addestramentoTiro || t.servizioSvolto || t.straordinarioPrimaInizio || t.straordinarioDopoInizio || t.secondoAttivo || t.compensazioneRiposo || t.cambioTurno || t.recuperoFestivoLavorato);
   if(extra) return 'extra';
   if(categoria) return 'turni';
   return 'vuoto';
@@ -361,23 +393,8 @@ function inizializzaToggleDettaglioGiorno(){
     toggle.setAttribute('aria-expanded', aperto ? 'false' : 'true');
   });
 }
-function inizializzaToggleIndicatoriGiorno(){
-  // Delegato sul contenitore fisso (non sostituito dai re-render), perché il pulsante
-  // "Indicatori del giorno" viene rigenerato ogni volta che si aggiorna il dettaglio giorno.
-  const contenitore = el('dettaglioGiornoCorpo');
-  if(!contenitore) return;
-  contenitore.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-toggle-sezione="indicatoriGiorno"]');
-    if(!btn) return;
-    const pannello = el('dettaglioIndicatoriIcone');
-    if(!pannello) return;
-    const aperto = !pannello.hidden;
-    pannello.hidden = aperto;
-    btn.setAttribute('aria-expanded', aperto ? 'false' : 'true');
-  });
-}
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); });
-else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); inizializzaToggleIndicatoriGiorno(); }
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); });
+else { inizializzaToggleRiepilogoV45(); inizializzaToggleDettaglioGiorno(); }
 
 function aggiornaProssimoTurno(){
   const widget = el('prossimoTurnoWidget');
@@ -719,7 +736,7 @@ function aggiornaDettaglioGiorno(){
         <div><span>Totale giorno</span><strong>${formatOreMinuti(totaleGiorno)}</strong></div>
       </div>`;
     corpo.innerHTML = `
-      <button type="button" class="dettaglio-sezione-titolo dettaglio-sezione-toggle" data-toggle-sezione="indicatoriGiorno" aria-expanded="true">Indicatori del giorno <span class="dettaglio-sezione-freccia" aria-hidden="true">▾</span></button>
+      <div class="dettaglio-sezione-titolo">Indicatori del giorno</div>
       <div class="dettaglio-indicatori-icone" id="dettaglioIndicatoriIcone">
         ${servizi.length ? servizi.slice(0,4).map(x => `<div><span class="indicatore-icona indicatore-${x[0]}">${x[1]}</span><small>${escapeHtml(x[2])}</small></div>`).join('') : '<div class="dettaglio-nessun-extra">Nessun indicatore extra</div>'}
       </div>

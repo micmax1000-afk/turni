@@ -113,6 +113,29 @@ test('iconaAssenza: una voce personalizzata non riconosciuta usa l\'icona generi
   assert.equal(app.iconaAssenza(undefined), '📌');
 });
 
+test('rilevaSovrapposizioneStraordinario: rileva se lo straordinario "prima" o "dopo" si sovrappone all\'orario del turno', () => {
+  const app = caricaApp();
+  const sovrapposto1 = { data:'2026-09-05', oraInizio:'07:00', oraFine:'13:00', straordinarioPrimaInizio:'06:00', straordinarioPrimaFine:'08:00' };
+  assert.equal(app.rilevaSovrapposizioneStraordinario(sovrapposto1), true);
+
+  const corretto = { data:'2026-09-05', oraInizio:'07:00', oraFine:'13:00', straordinarioPrimaInizio:'05:00', straordinarioPrimaFine:'07:00' };
+  assert.equal(app.rilevaSovrapposizioneStraordinario(corretto), false);
+
+  const sovrapposto2 = { data:'2026-09-05', oraInizio:'07:00', oraFine:'13:00', straordinarioDopoInizio:'12:00', straordinarioDopoFine:'15:00' };
+  assert.equal(app.rilevaSovrapposizioneStraordinario(sovrapposto2), true);
+
+  const nessuno = { data:'2026-09-05', oraInizio:'07:00', oraFine:'13:00' };
+  assert.equal(app.rilevaSovrapposizioneStraordinario(nessuno), false);
+});
+
+test('categoriaFiltroCalendario: "Lavorato sul riposo" non fa più ricadere il giorno in "Giorni liberi" — regressione', () => {
+  const app = caricaApp();
+  assert.equal(app.categoriaFiltroCalendario({ compensazioneRiposo: true }, null), 'extra');
+  assert.equal(app.categoriaFiltroCalendario({ cambioTurno: true }, null), 'extra');
+  assert.equal(app.categoriaFiltroCalendario({ recuperoFestivoLavorato: true }, null), 'extra');
+  assert.equal(app.categoriaFiltroCalendario({}, null), 'vuoto', 'un giorno davvero senza dati deve restare "vuoto"');
+});
+
 test('formatOreMinuti: converte correttamente ore decimali in formato h:mm', () => {
   const app = caricaApp();
   assert.equal(app.formatOreMinuti(6), '6:00');

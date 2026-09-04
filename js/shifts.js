@@ -225,6 +225,13 @@ function apriModaleTurno(iso){
   el('campoStrPrimaFine').value = t.straordinarioPrimaFine || '';
   el('campoStrDopoInizio').value = t.straordinarioDopoInizio || '';
   el('campoStrDopoFine').value = t.straordinarioDopoFine || '';
+  // Il secondo blocco straordinario resta nascosto finché non serve: lo mostriamo di default
+  // solo se il turno ha già dati salvati lì (riapertura di un turno con due finestre distinte).
+  const secondoStrPresente = !!(t.straordinarioDopoInizio || t.straordinarioDopoFine);
+  const blocchStrSecondo = el('blocchStrSecondo');
+  if(blocchStrSecondo) blocchStrSecondo.hidden = !secondoStrPresente;
+  const btnAggiungiStr = el('btnAggiungiSecondoStraordinario');
+  if(btnAggiungiStr) btnAggiungiStr.hidden = secondoStrPresente;
   el('campoCompensaStraordinario').checked = !!t.compensaStraordinario;
   el('campoPermessoBreveAttivo').checked = !!t.permessoBreveAttivo;
   el('campoPermessoBreveInizio').value = t.permessoBreveOraInizio || '';

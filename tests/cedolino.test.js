@@ -8,7 +8,6 @@ function configuraAppBase(app, overrideAnagrafica){
   app.AppState.anagrafica = Object.assign({
     qualifica: 'Assistente Capo',
     anni: 10,
-    assegnoFunzionale: 'no',
     regione: 'Lazio',
     coniugeACarico: 'no',
     figliOver21: 0,
@@ -28,24 +27,24 @@ function popolaMeseConTurnoSemplice(app, anno, mese, oraInizio, oraFine){
   }
 }
 
-test('calcolaAssegnoFunzioneMensile: zero se l\'assegno non è attivo in anagrafica', () => {
+test('calcolaAssegnoFunzioneMensile: zero se gli anni di servizio non raggiungono la prima soglia (17)', () => {
   const app = caricaApp();
-  configuraAppBase(app, { assegnoFunzionale: 'no' });
+  configuraAppBase(app, { anni: 10 });
   assert.equal(app.calcolaAssegnoFunzioneMensile(), 0);
 });
 
-test('calcolaAssegnoFunzioneMensile: applica la soglia corretta in base agli anni di servizio (ruolo truppa)', () => {
+test('calcolaAssegnoFunzioneMensile: automatico al superamento della soglia di anni, senza bisogno di attivarlo manualmente (ruolo truppa)', () => {
   const app = caricaApp();
-  configuraAppBase(app, { assegnoFunzionale: 'si', anni: 10 });
+  configuraAppBase(app, { anni: 10 });
   assert.equal(app.calcolaAssegnoFunzioneMensile(), 0, '10 anni non raggiunge nessuna soglia (minima 17)');
 
-  configuraAppBase(app, { assegnoFunzionale: 'si', anni: 20 });
+  configuraAppBase(app, { anni: 20 });
   assert.equal(app.calcolaAssegnoFunzioneMensile(), app.round2(1448.40 / 12));
 
-  configuraAppBase(app, { assegnoFunzionale: 'si', anni: 30 });
+  configuraAppBase(app, { anni: 30 });
   assert.equal(app.calcolaAssegnoFunzioneMensile(), app.round2(2949.83 / 12));
 
-  configuraAppBase(app, { assegnoFunzionale: 'si', anni: 35 });
+  configuraAppBase(app, { anni: 35 });
   assert.equal(app.calcolaAssegnoFunzioneMensile(), app.round2(3392.30 / 12));
 });
 
@@ -163,7 +162,7 @@ test('generaCedolino: reddito elevato (molto straordinario) non produce mai un n
   // Scenario "stress test": turni con straordinario tutti i giorni per un anno intero, per spingere
   // il reddito annuo stimato ben oltre i 50.000€ e verificare che l'IRPEF (quindi il netto) resti sensata.
   const app = caricaApp();
-  configuraAppBase(app, { qualifica: 'Commissario Capo', anni: 30, assegnoFunzionale: 'si' });
+  configuraAppBase(app, { qualifica: 'Commissario Capo', anni: 30 });
   const giorniNelMese = new Date(2026, 2 + 1, 0).getDate();
   for(let g = 1; g <= giorniNelMese; g++){
     const iso = app.dataISO(new Date(2026, 2, g));

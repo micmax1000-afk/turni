@@ -594,6 +594,13 @@ h3{ font-family: var(--font-display); font-weight:600; }
 /* V53 — Link "Personalizza colori" (il pannello di modifica ora vive in Impostazioni) */
 .link-colori-turni{display:inline-block;margin:2px 0 16px;font-size:.76rem;font-weight:700;color:var(--gallone,#2563eb);text-decoration:none}
 .link-colori-turni:hover{text-decoration:underline}
+
+/* V57 — Straordinario semplificato: link aggiungi/rimuovi secondo blocco */
+.link-aggiungi-straordinario,.link-rimuovi-straordinario{display:inline-block;margin:2px 0 10px;font-size:.76rem;font-weight:700;border:0;background:transparent;padding:0;cursor:pointer;text-decoration:none;font-family:inherit}
+.link-aggiungi-straordinario{color:var(--gallone,#2563eb)}
+.link-aggiungi-straordinario:hover{text-decoration:underline}
+.link-rimuovi-straordinario{color:var(--rosso-bollo,#a23b34);margin-top:2px}
+.link-rimuovi-straordinario:hover{text-decoration:underline}
 .legenda-colori .pallino{width:10px;height:10px;}
 [data-tema="scuro"] .giorno-cella{background:var(--pannello);}
 [data-tema="scuro"] .giorno-cella.tipo-riposo{background:var(--tipo-riposo);}
@@ -643,9 +650,6 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .dettaglio-sezione-titolo{margin:16px 0 9px;font-size:.78rem;font-weight:800;color:var(--inchiostro)}
 .dettaglio-indicatori-icone{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.dettaglio-indicatori-icone>div{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px}.indicatore-icona{width:38px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:1rem;background:#EEF3FF;color:#245BC7}.indicatore-missione{background:#DDE9FF}.indicatore-esterno{background:#DDF1FF}.indicatore-reperibilita{background:#FFF0C7;color:#9A6200}.indicatore-controllo{background:#E1F0FF;color:#1269A8}.indicatore-op{background:#E1E9FF;color:#274B9F}.indicatore-buono{background:#E8F6EA;color:#26713A}.dettaglio-indicatori-icone small{font-size:.62rem;color:var(--testo-tenue);line-height:1.15}.dettaglio-nessun-extra{grid-column:1/-1;padding:10px;color:var(--testo-tenue);font-size:.78rem;text-align:center;background:var(--carta);border-radius:10px}
 .dettaglio-indicatori-icone[hidden]{display:none!important}
-.dettaglio-sezione-toggle{display:flex;align-items:center;gap:6px;width:100%;border:0;background:transparent;padding:0;margin:16px 0 9px;cursor:pointer;font:inherit;font-size:.78rem;font-weight:800;color:var(--inchiostro);text-align:left}
-.dettaglio-sezione-freccia{opacity:.5;transition:transform .15s ease;font-size:.75rem}
-.dettaglio-sezione-toggle[aria-expanded="true"] .dettaglio-sezione-freccia{transform:rotate(180deg)}
 
 /* V50 — Blocco informativo richiudibile generico (es. nota Assegno Unico in Anagrafica) */
 .info-richiudibile{margin:4px 0 10px;border:1px solid var(--bordo);border-radius:12px;background:var(--carta);overflow:hidden}
