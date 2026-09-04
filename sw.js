@@ -1,6 +1,6 @@
-/* Turni & Accessorio PS — Service Worker V47 */
+/* Turni & Accessorio PS — Service Worker V48 */
 'use strict';
-const CACHE='turni-ps-v47';
+const CACHE='turni-ps-v48';
 const APP_SHELL=[
  './','./index.html','./manifest.json','./style.css','./script.js',
  './js/config.js','./js/state.js','./js/storage.js','./js/utils.js','./js/shifts.js','./js/absences.js','./js/calendar.js','./js/sequence.js','./js/payroll.js','./js/tables.js','./js/profile.js','./js/backup.js','./js/ui.js','./js/dashboard.js','./js/statistics.js','./js/offline.js','./js/migrations.js','./js/data-guard.js','./js/data/tabelle-2026.js',
@@ -36,4 +36,32 @@ self.addEventListener('fetch', event => {
       }).catch(() => caches.match('./index.html'));
     })
   );
+});
+
+// Supporto tecnico per le notifiche push: l'app non ha un server proprio che le invii
+// (è pensata per funzionare offline, senza backend), quindi questo listener non riceverà mai
+// eventi reali finché non si aggiunge un'infrastruttura di invio (chiavi VAPID + server).
+// È comunque utile dichiararlo: se in futuro servisse, la parte lato Service Worker è già pronta.
+self.addEventListener('push', event => {
+  const dati = event.data ? (() => { try { return event.data.json(); } catch { return {}; } })() : {};
+  const titolo = dati.title || 'Turni & Accessorio PS';
+  const opzioni = {
+    body: dati.body || 'Hai una nuova notifica.',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-96.png'
+  };
+  event.waitUntil(self.registration.showNotification(titolo, opzioni));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(self.clients.openWindow('./index.html'));
+});
+
+// Supporto tecnico per la sincronizzazione in background: stessa premessa del push, nessuna
+// sincronizzazione server-side è attiva oggi (il backup Drive avviene solo su richiesta esplicita
+// dell'utente, non in automatico in background).
+self.addEventListener('sync', event => {
+  // Placeholder pronto per un futuro utilizzo reale (es. ritentare un backup Drive fallito
+  // quando torna la connessione), non ancora collegato a nessuna azione.
 });
