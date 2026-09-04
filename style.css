@@ -656,6 +656,19 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .info-richiudibile-corpo[hidden]{display:none!important}
 .info-richiudibile-corpo p{margin:0;font-size:.74rem;line-height:1.45;color:var(--testo-tenue)}
 
+/* V56 — Anagrafica: "Altri dati" richiudibile */
+.anagrafica-altri-dati{margin:6px 0 10px;border:1px solid var(--bordo);border-radius:14px;background:var(--carta);overflow:hidden}
+.anagrafica-altri-dati>summary{cursor:pointer;padding:12px 14px;font-weight:700;font-size:.82rem;list-style:none}
+.anagrafica-altri-dati>summary::-webkit-details-marker{display:none}
+.anagrafica-altri-dati-corpo{padding:0 14px 14px;display:flex;flex-direction:column;gap:4px}
+
+/* V56 — Assenze: note informative raggruppate in un unico richiudibile */
+.info-richiudibile-assenze{margin:6px 0 12px;border:1px solid var(--bordo);border-radius:14px;background:var(--carta);overflow:hidden}
+.info-richiudibile-assenze>summary{cursor:pointer;padding:11px 13px;font-weight:700;font-size:.78rem;color:var(--testo-tenue);list-style:none}
+.info-richiudibile-assenze>summary::-webkit-details-marker{display:none}
+.info-richiudibile-assenze-corpo{padding:0 13px 12px;display:flex;flex-direction:column;gap:9px}
+.info-richiudibile-assenze-corpo p{margin:0;font-size:.72rem;line-height:1.45;color:var(--testo-tenue)}
+
 .dettaglio-dettagli-lista{border-top:1px solid var(--bordo)}.dettaglio-dettagli-lista>div{display:flex;justify-content:space-between;gap:10px;padding:9px 2px;border-bottom:1px solid var(--bordo);font-size:.78rem}.dettaglio-dettagli-lista span{color:var(--testo-tenue)}.dettaglio-dettagli-lista strong{font-weight:700;text-align:right}
 .giorno-vuoto-card{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--carta);color:var(--testo-tenue)}.giorno-vuoto-card>div{display:flex;flex-direction:column;gap:2px}.giorno-vuoto-card strong{color:var(--testo)}.giorno-vuoto-card span{font-size:.76rem}.giorno-vuoto-icona{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#E8EDF5;color:#155EEF;font-weight:800}
 .dettaglio-giorno-azioni-principali{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.dettaglio-giorno-azioni-principali button{min-height:44px;border-radius:10px;font-weight:700;font-size:.78rem;cursor:pointer}.btn-dettaglio-modifica{border:1px solid #155EEF;background:#fff;color:#155EEF}.btn-dettaglio-rimuovi{border:1px solid #EF4444;background:#fff;color:#DC2626}.btn-dettaglio-rimuovi[hidden]{display:none}

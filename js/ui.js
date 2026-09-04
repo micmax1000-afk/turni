@@ -73,7 +73,7 @@ function mostraScheda(nome){
     const seq = el('sezioneSequenza');
     if(seq) seq.hidden = true;
   }
-  if(nome === 'statistiche'){ const a=el('campoAnnoStatistiche'); if(a && !a.value) a.value=new Date().getFullYear(); renderStatistiche(); }
+  if(nome === 'statistiche'){ const a=el('campoAnnoStatistiche'); if(a && !a.value) a.value=new Date().getFullYear(); renderStatistiche(); if(typeof aggiornaRiepilogoMensile === 'function') aggiornaRiepilogoMensile(); }
   if(nome === 'impostazioni') inizializzaImpostazioni();
   window.scrollTo({ top:0, behavior:'instant' });
 }
