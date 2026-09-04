@@ -11,6 +11,7 @@ window.AppState = window.AppState || {
   conguagliPerMese: {},
   storico: {},
   assenze: [],
+  indennitaPersonalizzate: [],
   noteGiorni: {},
   sequenzaTurni: [],
   coloriTurni: {}

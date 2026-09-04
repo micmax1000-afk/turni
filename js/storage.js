@@ -85,6 +85,14 @@ function caricaAssenze(){
 
 function salvaAssenzeStorage(){ TurniPSStorage.setItem(CHIAVE_ASSENZE, JSON.stringify(AppState.assenze)); }
 
+function caricaIndennitaPersonalizzate(){
+  try{
+    const salvate = JSON.parse(TurniPSStorage.getItem(CHIAVE_INDENNITA_PERSONALIZZATE));
+    return Array.isArray(salvate) ? salvate : [];
+  }catch{ return []; }
+}
+function salvaIndennitaPersonalizzateStorage(){ TurniPSStorage.setItem(CHIAVE_INDENNITA_PERSONALIZZATE, JSON.stringify(AppState.indennitaPersonalizzate)); }
+
 function caricaNoteGiorni(){
   try{ return JSON.parse(TurniPSStorage.getItem(CHIAVE_NOTE_GIORNI)) || {}; }catch{ return {}; }
 }

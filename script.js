@@ -92,6 +92,7 @@ idContatore = 1; // già dichiarato in utils.js
 
 
 AppState.assenze = caricaAssenze(); // array [{ id, nome, valore, unita, personalizzata }]
+AppState.indennitaPersonalizzate = caricaIndennitaPersonalizzate(); // array [{ id, nome, valore, unita: 'mese'|'turno' }]
 TurniPSStorage.setItem(CHIAVE_ASSENZE, JSON.stringify(AppState.assenze)); // persiste subito l'eventuale merge di nuove voci predefinite
 
 AppState.noteGiorni = caricaNoteGiorni(); // { 'AAAA-MM-GG': 'testo nota' }

@@ -20,7 +20,8 @@ window.TurniPSConfig = Object.freeze({
     CHIAVE_ULTIMO_BACKUP: 'simCedolino_ultimoBackup_v1',
     CHIAVE_ASPETTATIVA_MIGRATA: 'simCedolino_aspettativaMigrata_v1',
     CHIAVE_DISCLAIMER_MOSTRATO: 'simCedolino_disclaimerMostrato_v1',
-    CHIAVE_COLORI_TURNI: 'simCedolino_coloriTurni_v1'
+    CHIAVE_COLORI_TURNI: 'simCedolino_coloriTurni_v1',
+    CHIAVE_INDENNITA_PERSONALIZZATE: 'simCedolino_indennitaPersonalizzate_v1'
   })
 });
 

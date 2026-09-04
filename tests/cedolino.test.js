@@ -113,8 +113,45 @@ test('generaCedolino: trattenuta sindacale attiva solo con iscrizione "si", zero
   assert.equal(app.generaCedolino(2026, 2).sindacato, app.AppState.tabelle.sindacatoMensile, 'un vecchio nome sindacale salvato deve continuare a contare come iscritto');
 });
 
-test('generaCedolino: il netto è sempre inferiore al lordo quando ci sono trattenute', () => {
+test('calcolaCompetenze: indennità personalizzata fissa al mese si somma al lordo (es. Vacanza contrattuale)', () => {
   const app = caricaApp();
+  configuraAppBase(app);
+  popolaMeseConTurnoSemplice(app, 2026, 2, '07:00', '13:00');
+  app.AppState.indennitaPersonalizzate = [
+    { id: 'x1', nome: 'Vacanza contrattuale', valore: 25, unita: 'mese' }
+  ];
+  const senzaExtra = (() => {
+    app.AppState.indennitaPersonalizzate = [];
+    return app.calcolaCompetenze(2026, 2).totaleLordo;
+  })();
+  app.AppState.indennitaPersonalizzate = [{ id: 'x1', nome: 'Vacanza contrattuale', valore: 25, unita: 'mese' }];
+  const conExtra = app.calcolaCompetenze(2026, 2);
+  assert.equal(conExtra.totaleLordo, app.round2(senzaExtra + 25));
+  assert.equal(conExtra.personalizzate.length, 1);
+  assert.equal(conExtra.personalizzate[0].nome, 'Vacanza contrattuale');
+  assert.equal(conExtra.personalizzate[0].importo, 25);
+});
+
+test('calcolaCompetenze: indennità personalizzata "per turno lavorato" si moltiplica per i giorni di presenza effettiva', () => {
+  const app = caricaApp();
+  configuraAppBase(app);
+  // Marzo 2026 ha 31 giorni: turno tutti i giorni => 31 giorni di presenza effettiva.
+  popolaMeseConTurnoSemplice(app, 2026, 2, '07:00', '13:00');
+  app.AppState.indennitaPersonalizzate = [{ id: 'x2', nome: 'Extra turno', valore: 2, unita: 'turno' }];
+  const comp = app.calcolaCompetenze(2026, 2);
+  assert.equal(comp.personalizzate[0].importo, app.round2(2 * 31));
+});
+
+test('calcolaCompetenze: nessuna indennità personalizzata configurata non altera il calcolo esistente', () => {
+  const app = caricaApp();
+  configuraAppBase(app);
+  popolaMeseConTurnoSemplice(app, 2026, 2, '07:00', '13:00');
+  app.AppState.indennitaPersonalizzate = [];
+  const comp = app.calcolaCompetenze(2026, 2);
+  assert.deepEqual(comp.personalizzate, []);
+});
+
+test('generaCedolino: il netto è sempre inferiore al lordo quando ci sono trattenute', () => {  const app = caricaApp();
   configuraAppBase(app);
   popolaMeseConTurnoSemplice(app, 2026, 2, '07:00', '13:00');
   const c = app.generaCedolino(2026, 2);

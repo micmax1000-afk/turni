@@ -66,9 +66,20 @@ function calcolaCompetenze(anno, mese){
   const totaleFisse = round2(Object.values(fisse).reduce((a,b) => a+b, 0));
 
   const accessorie = { strDiurno, strNotturno, strFestivo, strNotturnoFestivo, indTurnoNotturno, indFestiva, indFestivitaParticolare, indOP, indServizioEsterno, indControlloTerritorio, indReperibilita, indMissioni, indCompensazioneRiposo, indCambioTurno, indProduttivitaCollettiva };
-  const totaleAccessorie = round2(Object.values(accessorie).reduce((a,b) => a+b, 0));
+  const totaleAccessorieFisse = round2(Object.values(accessorie).reduce((a,b) => a+b, 0));
 
-  return { qualifica, fisse, totaleFisse, accessorie, totaleAccessorie, totaleLordo: round2(totaleFisse + totaleAccessorie), tot };
+  // Indennità personalizzate (es. "Vacanza contrattuale" o altre voci non coperte dalle tabelle
+  // ufficiali): l'utente le definisce liberamente in Impostazioni → Tabelle con un importo fisso
+  // al mese, oppure moltiplicato per i giorni di presenza effettiva lavorati nel mese.
+  const personalizzate = (AppState.indennitaPersonalizzate || []).map(ip => ({
+    nome: ip.nome,
+    unita: ip.unita,
+    importo: ip.unita === 'turno' ? round2((Number(ip.valore) || 0) * giorniPresenzaEffettiva) : round2(Number(ip.valore) || 0)
+  }));
+  const totalePersonalizzate = round2(personalizzate.reduce((a, p) => a + p.importo, 0));
+  const totaleAccessorie = round2(totaleAccessorieFisse + totalePersonalizzate);
+
+  return { qualifica, fisse, totaleFisse, accessorie, personalizzate, totaleAccessorie, totaleLordo: round2(totaleFisse + totaleAccessorie), tot };
 }
 
 function calcolaIRPEFAnnua(imponibileAnnuo){
@@ -272,6 +283,7 @@ function renderCedolino(){
         ${riga('Compensazione Riposo Lavorato', c.comp.accessorie.indCompensazioneRiposo)}
         ${riga('Cambio Turno', c.comp.accessorie.indCambioTurno)}
         ${c.comp.accessorie.indProduttivitaCollettiva > 0 ? riga('Produttività Collettiva', c.comp.accessorie.indProduttivitaCollettiva, false, `anno ${annoCorrente - 1}`) : ''}
+        ${c.comp.personalizzate.map(p => riga(p.nome, p.importo, false, p.unita === 'turno' ? 'per turno lavorato' : 'fisso al mese')).join('')}
       </div>
     </details>
 
