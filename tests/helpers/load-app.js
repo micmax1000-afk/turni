@@ -81,6 +81,7 @@ const FILE_APP = [
   'js/tables.js',
   'js/profile.js',
   'js/sequence.js',
+  'js/ui.js',
   'js/payroll.js'
 ];
 

@@ -590,6 +590,10 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .giorno-cella.ha-servizio-esterno{box-shadow:inset 0 -3px 0 #0EA5E9, inset 0 0 0 1px var(--bordo);}
 .giorno-cella.ha-op{box-shadow:inset 0 -3px 0 #3158C7, inset 0 0 0 1px var(--bordo);}
 .legenda-colori{gap:8px;margin-top:14px;padding-top:10px;border-top:1px solid var(--bordo);}
+
+/* V53 — Link "Personalizza colori" (il pannello di modifica ora vive in Impostazioni) */
+.link-colori-turni{display:inline-block;margin:2px 0 16px;font-size:.76rem;font-weight:700;color:var(--gallone,#2563eb);text-decoration:none}
+.link-colori-turni:hover{text-decoration:underline}
 .legenda-colori .pallino{width:10px;height:10px;}
 [data-tema="scuro"] .giorno-cella{background:var(--pannello);}
 [data-tema="scuro"] .giorno-cella.tipo-riposo{background:var(--tipo-riposo);}
@@ -928,6 +932,13 @@ h3{ font-family: var(--font-display); font-weight:600; }
 @media(max-width:700px){.tabelle-toolbar-v17{display:grid;grid-template-columns:1fr}.tabella-filtri-v17{width:100%}.tabella-riga-v17{grid-template-columns:1fr}.tabella-edit{max-width:none}.tabelle-v17-footer{align-items:flex-start;flex-direction:column}.tabelle-hero-v17{padding:15px}.tabelle-hero-v17 h3{font-size:1.12rem}}
 @media(max-width:390px){.tabella-riga-v17{padding:10px 0}.tabella-label strong{font-size:.7rem}.tabella-edit input{font-size:.74rem}.tabella-head-v17{padding:12px}.tabella-body-v17{padding-inline:11px}.tabelle-hero-v17 p{font-size:.63rem}}
 
+/* V54 — Interruttore "Mostra impostazioni avanzate" in Tabelle */
+.switch-avanzate-v17{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid var(--bordo);border-radius:16px;background:var(--carta);cursor:pointer}
+.switch-avanzate-v17 input[type="checkbox"]{width:42px;height:24px;flex-shrink:0;accent-color:#2563eb;cursor:pointer}
+.switch-avanzate-v17-testo{display:flex;flex-direction:column;gap:2px}
+.switch-avanzate-v17-testo strong{font-size:.8rem}
+.switch-avanzate-v17-testo small{font-size:.68rem;color:var(--testo-tenue);line-height:1.35}
+
 /* V52 — Indennità personalizzate (Tabelle) */
 .riga-indennita-personalizzata{padding:11px 0;border-bottom:1px solid var(--bordo);display:flex;flex-direction:column;gap:8px}
 .riga-indennita-personalizzata:last-of-type{border-bottom:0}
@@ -952,6 +963,12 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .toast-container{position:fixed;right:16px;bottom:82px;z-index:9999;display:grid;gap:8px;width:min(360px,calc(100vw - 24px));pointer-events:none}.toast-v20{display:grid;grid-template-columns:28px 1fr 24px;gap:9px;align-items:center;padding:11px 12px;border:1px solid var(--bordo);border-radius:15px;background:var(--carta);box-shadow:0 10px 28px rgba(20,30,50,.16);opacity:0;transform:translateY(8px);transition:.2s ease;pointer-events:auto}.toast-v20.visibile{opacity:1;transform:none}.toast-icon{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:var(--sfondo);font-weight:900;font-size:.78rem}.toast-text{font-size:.68rem;line-height:1.35}.toast-close{border:0;background:transparent;color:var(--testo-tenue);font-size:1rem;cursor:pointer}.toast-successo .toast-icon{background:#e9f7ef;color:#19733b}.toast-errore .toast-icon{background:#fde9e7;color:#b42318}.toast-avviso .toast-icon{background:#fff4d8;color:#8a5a00}.toast-info .toast-icon{background:#e8f0ff;color:#2563a7}
 [data-tema="scuro"] .app-alert-v20.alert-avviso{background:#332a18;border-color:#705d30}.app-alert-v20.alert-avviso>span{background:#4b3b19;color:#ffe5a3}[data-tema="scuro"] .toast-successo .toast-icon{background:#173a27;color:#8ce0ad}[data-tema="scuro"] .toast-errore .toast-icon{background:#47201e;color:#ffb4ac}[data-tema="scuro"] .toast-avviso .toast-icon{background:#4b3b19;color:#ffe5a3}
 @media(max-width:600px){.toast-container{right:12px;bottom:76px;width:calc(100vw - 24px)}.app-alert-v20{grid-template-columns:26px 1fr 24px}}
+
+/* V55 — Pulsante d'azione dentro un avviso (es. invito "Genera turni" al primo avvio) */
+.app-alert-v20-corpo{display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.app-alert-v20-azione{border:1px solid #2563eb!important;background:#2563eb!important;color:#fff!important;font-size:.68rem!important;font-weight:700;padding:7px 12px;border-radius:9px;cursor:pointer}
+.app-alert-v20-azione:hover{background:#1d4ed8!important}
+.app-alert-v20-chiudi{align-self:start}
 
 /* V21 — Ricerca globale */
 .overlay-ricerca-v21{position:fixed;inset:0;z-index:10020;background:rgba(10,18,30,.52);display:grid;place-items:start center;padding:7vh 14px 24px;backdrop-filter:blur(5px)}
@@ -1275,8 +1292,11 @@ h3{ font-family: var(--font-display); font-weight:600; }
 /* V42 — azioni rapide calendario e sequenza nelle impostazioni */
 .azioni-calendario-rapide{margin:10px 0 12px;padding:12px;border:1px solid var(--bordo,#d9dce5);border-radius:14px;background:var(--superficie,#fff)}
 .azioni-calendario-header{margin-bottom:9px}.azioni-calendario-header strong{display:block;font-size:.96rem}.azioni-calendario-header span{display:block;margin-top:3px;font-size:.78rem;opacity:.72}
-.azioni-calendario-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}.azioni-calendario-grid .campo-modale{margin:0}.azioni-calendario-rapide select{width:100%}.azioni-calendario-rapide .btn-cancella-turni{margin-top:10px}.azioni-calendario-rapide .btn-modifica-giorno-selezionato{margin-top:8px;width:100%}.impostazioni-sottosezione{margin-top:12px}#sezioneSequenzaHost #sezioneSequenza{margin-top:12px}
-@media (max-width:650px){.azioni-calendario-grid{grid-template-columns:1fr}}
+.azioni-calendario-grid{display:grid;grid-template-columns:1fr;gap:10px}.azioni-calendario-grid .campo-modale{margin:0}.azioni-calendario-rapide select{width:100%}.azioni-calendario-rapide .btn-cancella-turni{margin-top:10px}.azioni-calendario-rapide .btn-modifica-giorno-selezionato{margin-top:8px;width:100%}.impostazioni-sottosezione{margin-top:12px}#sezioneSequenzaHost #sezioneSequenza{margin-top:12px}
+.azioni-rapide-altro{margin-top:10px;border-top:1px solid var(--bordo);padding-top:10px}
+.azioni-rapide-altro>summary{cursor:pointer;font-size:.76rem;font-weight:700;color:var(--testo-tenue);list-style:none}
+.azioni-rapide-altro>summary::-webkit-details-marker{display:none}
+.azioni-rapide-altro-corpo{display:flex;flex-direction:column;gap:10px;margin-top:10px}
 
 
 /* V42.1 — distintivo grafico della qualifica in Anagrafica */

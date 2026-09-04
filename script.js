@@ -400,9 +400,7 @@ function inizializza(){
   const btnColoriHeader = el('btnApriColoriHeader');
   if(btnColoriHeader){
     btnColoriHeader.addEventListener('click', () => {
-      const btn = el('btnApriColoriTurni');
-      if(btn) btn.click();
-      setTimeout(() => el('pannelloColoriTurni')?.scrollIntoView({behavior:'smooth', block:'nearest'}), 80);
+      apriPannelloColori();
     });
   }
 
@@ -412,8 +410,14 @@ function inizializza(){
   on('settingsAnagrafica','click', () => mostraScheda('anagrafica'));
   on('settingsTabelle','click', () => mostraScheda('tabelle'));
   on('settingsColori','click', () => {
-    mostraScheda('turni');
-    setTimeout(() => { const b=el('btnApriColoriTurni'); if(b && el('pannelloColoriTurni') && el('pannelloColoriTurni').hidden) b.click(); el('pannelloColoriTurni')?.scrollIntoView({behavior:'smooth',block:'center'}); }, 80);
+    const p = el('pannelloColoriTurni');
+    if(p && p.hidden) apriPannelloColori();
+    else p?.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  on('linkColoriTurni','click', (e) => {
+    e.preventDefault();
+    mostraScheda('impostazioni');
+    setTimeout(() => { el('settingsColori')?.click(); }, 80);
   });
   on('settingsTema','click', () => applicaTema(document.body.dataset.tema === 'scuro' ? 'chiaro' : 'scuro'));
   on('settingsBackup','click', () => mostraImpostazioniBackup('sezioneBackup'));
@@ -696,7 +700,7 @@ function inizializza(){
     aggiornaPulsantiColoriDrive();
     p.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
-  el('btnApriColoriTurni').addEventListener('click', () => {
+  el('btnApriColoriTurni')?.addEventListener('click', () => {
     const p = el('pannelloColoriTurni');
     if(!p) return;
     if(p.hidden) apriPannelloColori();

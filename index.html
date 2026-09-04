@@ -53,30 +53,11 @@
 
     <div class="legenda-colori" id="legendaColoriTurni">
     </div>
-    <div style="margin:-4px 0 8px;">
-      <button class="btn-mini-icona" id="btnApriColoriTurni" type="button" title="Personalizza colori turni" style="width:auto; height:auto; padding:3px 9px; font-size:0.78rem;">🎨 Colori turni</button>
-    </div>
-    <div id="pannelloColoriTurni" class="pannello-colori-turni" hidden>
-      <div class="pannello-colori-header">
-        <div>
-          <strong class="pannello-colori-titolo">Colori turni</strong>
-          <p class="sotto-titolo" style="margin:4px 0 0;">Il colore si applica a tutta la casella (turni, riposo e assenze). Tocca il quadrato per cambiare.</p>
-        </div>
-        <button type="button" class="btn-icona" id="btnChiudiColoriTurni" aria-label="Chiudi tavolozza" title="Chiudi">✕</button>
-      </div>
-      <div id="corpoColoriTurni"></div>
-      <div class="pannello-colori-azioni">
-        <button class="btn-secondario" id="btnEsportaColoriTurni" type="button" title="Richiede Backup Drive (1,99€)">☁ Esporta colori (Drive)</button>
-        <button class="btn-secondario" id="btnImportaColoriTurni" type="button" title="Richiede Backup Drive (1,99€)">☁ Importa colori (Drive)</button>
-        <input type="file" id="campoImportaColoriTurni" accept="application/json,.json" hidden>
-        <button class="btn-secondario" id="btnRipristinaColoriTurni" type="button">↺ Ripristina predefiniti</button>
-        <button class="btn-primario" id="btnChiudiColoriTurni2" type="button">Fatto — torna al calendario</button>
-      </div>
-    </div>
+    <a href="#" class="link-colori-turni" id="linkColoriTurni">🎨 Personalizza i colori dei turni</a>
 
     <div class="azioni-calendario-rapide" id="azioniCalendarioRapide">
       <div class="azioni-calendario-header">
-        <div><strong>⚡ Azioni rapide</strong><span>Filtra il calendario o prepara rapidamente un'azione per il giorno selezionato.</span></div>
+        <div><strong>⚡ Azioni rapide</strong><span>Prepara rapidamente un'azione per il giorno selezionato.</span></div>
       </div>
       <label class="campo-modale nota-giorno-campo">🗒️ Nota del giorno
         <textarea id="campoNotaGiorno" rows="2" placeholder="Impegni lavorativi o personali da svolgere nella giornata selezionata..."></textarea>
@@ -85,16 +66,6 @@
         <input type="text" id="campoServizioSvolto" placeholder="es. Pattugliamento, Ufficio denunce, Scorta...">
       </label>
       <div class="azioni-calendario-grid">
-        <label class="campo-modale">🔎 Visualizza
-          <select id="filtroCalendarioSelect">
-            <option value="tutti">Tutti i giorni</option>
-            <option value="turni">Turni</option>
-            <option value="assenze">Assenze</option>
-            <option value="riposi">Riposi</option>
-            <option value="extra">Extra e servizi</option>
-            <option value="vuoto">Giorni liberi</option>
-          </select>
-        </label>
         <label class="campo-modale">➕ Inserisci rapidamente
           <select id="azioneRapidaCalendario">
             <option value="">— scegli un'azione —</option>
@@ -120,8 +91,24 @@
           </select>
         </label>
       </div>
-      <button class="btn-secondario btn-cancella-turni" id="btnCancellaTurniMese" type="button">🗑️ Cancella turni del mese</button>
       <button class="btn-primario btn-modifica-giorno-selezionato" id="btnApriModificaGiorno" type="button">✏️ Modifica turno del giorno selezionato</button>
+
+      <details class="azioni-rapide-altro">
+        <summary>Altro ▾</summary>
+        <div class="azioni-rapide-altro-corpo">
+          <label class="campo-modale">🔎 Visualizza
+            <select id="filtroCalendarioSelect">
+              <option value="tutti">Tutti i giorni</option>
+              <option value="turni">Turni</option>
+              <option value="assenze">Assenze</option>
+              <option value="riposi">Riposi</option>
+              <option value="extra">Extra e servizi</option>
+              <option value="vuoto">Giorni liberi</option>
+            </select>
+          </label>
+          <button class="btn-secondario btn-cancella-turni" id="btnCancellaTurniMese" type="button">🗑️ Cancella turni del mese</button>
+        </div>
+      </details>
     </div>
 
     <div class="dettaglio-giorno" id="dettaglioGiorno">
@@ -498,7 +485,7 @@
     <h2>Tabelle Ufficiali</h2>
     <p class="avviso-tabelle">⚠ Valori indicativi tratti da fonti pubbliche (rinnovo CCNL 2022-2024 e Legge di Bilancio 2026). <strong>Verificali e correggili confrontandoli con il tuo cedolino NoiPA reale</strong> prima di usarli per decisioni economiche: stipendi, indennità e aliquote possono cambiare con i rinnovi contrattuali.</p>
     <div id="corpoTabelle"></div>
-    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+    <div id="footerTabelleEsterno" style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
       <button class="btn-secondario" id="btnResetTabelle" type="button">Ripristina predefiniti</button>
       <button class="btn-primario" id="btnSalvaTabelle" type="button">Salva</button>
     </div>
@@ -572,6 +559,23 @@
         <button type="button" class="btn-secondario" id="settingsDrive">☁ Backup Drive</button>
         <button type="button" class="btn-secondario" id="settingsSequenza">🔁 Sequenza automatica dei turni</button>
         <button type="button" class="btn-secondario" id="btnInstallaAppV23" hidden>📲 Installa l'app</button>
+      </div>
+      <div id="pannelloColoriTurni" class="pannello-colori-turni" hidden>
+        <div class="pannello-colori-header">
+          <div>
+            <strong class="pannello-colori-titolo">Colori turni</strong>
+            <p class="sotto-titolo" style="margin:4px 0 0;">Il colore si applica a tutta la casella (turni, riposo e assenze). Tocca il quadrato per cambiare.</p>
+          </div>
+          <button type="button" class="btn-icona" id="btnChiudiColoriTurni" aria-label="Chiudi tavolozza" title="Chiudi">✕</button>
+        </div>
+        <div id="corpoColoriTurni"></div>
+        <div class="pannello-colori-azioni">
+          <button class="btn-secondario" id="btnEsportaColoriTurni" type="button" title="Richiede Backup Drive (1,99€)">☁ Esporta colori (Drive)</button>
+          <button class="btn-secondario" id="btnImportaColoriTurni" type="button" title="Richiede Backup Drive (1,99€)">☁ Importa colori (Drive)</button>
+          <input type="file" id="campoImportaColoriTurni" accept="application/json,.json" hidden>
+          <button class="btn-secondario" id="btnRipristinaColoriTurni" type="button">↺ Ripristina predefiniti</button>
+          <button class="btn-primario" id="btnChiudiColoriTurni2" type="button">Fatto</button>
+        </div>
       </div>
       <div class="impostazioni-tema" aria-label="Aspetto">
         <div class="impostazioni-tema-testo">

@@ -102,7 +102,16 @@ function aggiornaAvvisiApp(){
   const isoOggi = dataISO(oggi);
   const chiaveMese = `${oggi.getFullYear()}-${String(oggi.getMonth()+1).padStart(2,'0')}`;
   const turniMese = Object.keys(AppState.turni || {}).filter(k=>k.startsWith(chiaveMese));
-  if(turniMese.length === 0) out.push({tipo:'info', testo:'Nessun turno registrato nel mese corrente. Se hai già la turnazione, puoi generarla o inserirla dal calendario.'});
+  if(turniMese.length === 0){
+    // Primo avvio vero e proprio (nessun turno mai inserito, in nessun mese): invito diretto con
+    // pulsante d'azione, invece del semplice avviso informativo mostrato agli utenti già attivi.
+    const nessunTurnoMai = Object.keys(AppState.turni || {}).length === 0;
+    if(nessunTurnoMai && AppState.anagrafica){
+      out.push({ tipo:'info', testo:'Benvenuto! Genera la tua turnazione per iniziare a usare l\u2019app.', azione:{ label:'🚀 Genera turni', onClick: () => el('settingsSequenza')?.click() } });
+    } else {
+      out.push({tipo:'info', testo:'Nessun turno registrato nel mese corrente. Se hai già la turnazione, puoi generarla o inserirla dal calendario.'});
+    }
+  }
   const ultimo = TurniPSStorage.getItem(CHIAVE_ULTIMO_BACKUP);
   if(Object.keys(AppState.turni || {}).length && !ultimo) out.push({tipo:'avviso', testo:'Backup non ancora effettuato: esporta una copia dei tuoi dati.'});
   else if(ultimo){ const giorni=Math.floor((oggi-new Date(ultimo))/86400000); if(giorni>=30) out.push({tipo:'avviso', testo:`Backup vecchio di ${giorni} giorni. È consigliato crearne uno nuovo.`}); }
@@ -122,7 +131,10 @@ function renderAvvisiApp(){
   host.hidden=false;
   avvisi.forEach(a=>{
     const d=document.createElement('div'); d.className=`app-alert-v20 alert-${a.tipo}`;
-    d.innerHTML=`<span>${a.tipo==='avviso'?'⚠':a.tipo==='errore'?'!':'i'}</span><p></p><button type="button" aria-label="Chiudi">×</button>`;
-    d.querySelector('p').textContent=a.testo; d.querySelector('button').onclick=()=>d.remove(); host.appendChild(d);
+    d.innerHTML=`<span>${a.tipo==='avviso'?'⚠':a.tipo==='errore'?'!':'i'}</span><div class="app-alert-v20-corpo"><p></p>${a.azione ? `<button type="button" class="app-alert-v20-azione">${escapeHtml(a.azione.label)}</button>` : ''}</div><button type="button" class="app-alert-v20-chiudi" aria-label="Chiudi">×</button>`;
+    d.querySelector('p').textContent=a.testo;
+    if(a.azione) d.querySelector('.app-alert-v20-azione').onclick = a.azione.onClick;
+    d.querySelector('.app-alert-v20-chiudi').onclick=()=>d.remove();
+    host.appendChild(d);
   });
 }

@@ -29,6 +29,8 @@ di Node — usare sempre la forma con `*.test.js` sopra.)
   "stress test" con straordinario intenso per verificare che l'IRPEF non vada mai in negativo.
 - `assenze.test.js` — saldo ferie con riporto dall'anno precedente, ore di permesso
   breve da recuperare, ore compensate da straordinario convertito in riposo.
+- `onboarding.test.js` — avviso di primo avvio ("Genera turni"): compare solo con
+  anagrafica già impostata e nessun turno mai inserito, sparisce per gli utenti già attivi.
 
 ## Quando aggiornarli
 
