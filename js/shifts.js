@@ -194,9 +194,14 @@ function aggiornaAnteprima(){
   if(boxStr){
     const primaCalc = finestraDaOrari(t.data || dataISO(new Date()), t.straordinarioPrimaInizio, t.straordinarioPrimaFine);
     const dopoCalc = finestraDaOrari(t.data || dataISO(new Date()), t.straordinarioDopoInizio, t.straordinarioDopoFine);
-    let testo = (primaCalc.ore > 0 || dopoCalc.ore > 0)
-      ? `Ore di straordinario calcolate — prima: ${primaCalc.ore}h · dopo: ${dopoCalc.ore}h`
-      : '';
+    // Testo neutro: non indichiamo se un blocco è "prima" o "dopo" il turno, l'utente inserisce
+    // solo l'orario reale e non deve pensare a questa distinzione.
+    let testo = '';
+    if(primaCalc.ore > 0 && dopoCalc.ore > 0){
+      testo = `Ore di straordinario calcolate: ${primaCalc.ore}h + ${dopoCalc.ore}h = ${round2(primaCalc.ore + dopoCalc.ore)}h totali`;
+    } else if(primaCalc.ore > 0 || dopoCalc.ore > 0){
+      testo = `Ore di straordinario calcolate: ${primaCalc.ore || dopoCalc.ore}h`;
+    }
     if(t.compensaStraordinario && c.oreCompensate > 0) testo += `${testo ? ' — ' : ''}${c.oreCompensate}h convertite in riposo compensativo, escluse dalla paga.`;
     boxStr.textContent = testo;
   }
