@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "turniaccessorio.ps",
+      "sha256_cert_fingerprints": [
+        "1D:8A:CE:E3:21:06:41:D3:69:74:72:2A:66:8A:71:BC:7C:0F:ED:36:8F:0A:B9:CE:57:ED:2D:F7:17:C9:41:85"
+      ]
+    }
+  }
+]
