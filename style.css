@@ -34,6 +34,11 @@
   --font-cifre: 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, Consolas, monospace;
   --raggio: 3px;
   --ombra: 0 1px 2px rgba(27,36,64,0.07), 0 4px 14px rgba(27,36,64,0.06);
+  --sfondo-card: #FFFFFF;
+  --sfondo-secondario: #F4F6FA;
+  --superficie: #FFFFFF;
+  --superficie-secondaria: #F5F7FB;
+  --sfondo: #ECEFEA;
 }
 [data-tema="scuro"]{
   --carta: #14161B; --pannello: #1C1F26; --testo: #E7E6DF; --testo-tenue: #9A9C93;
@@ -43,6 +48,11 @@
   --tipo-notte: #193152; --tipo-riposo: #29402E; --tipo-assenza: #34373D;
   --badge-mattina: #4A351A; --badge-pomeriggio: #4A3F12; --badge-sera: #302552;
   --badge-notte: #193152; --badge-riposo: #29402E; --badge-assenza: #34373D;
+  --sfondo-card: #1C1F26;
+  --sfondo-secondario: #202631;
+  --superficie: #1C1F26;
+  --superficie-secondaria: #202631;
+  --sfondo: #14161B;
 }
 
 *{ box-sizing: border-box; }
@@ -1438,3 +1448,43 @@ h3{ font-family: var(--font-display); font-weight:600; }
 .dettaglio-giorno-freccia{opacity:.5;transition:transform .15s ease;flex-shrink:0;font-size:.85rem}
 .dettaglio-giorno-titolo-btn[aria-expanded="true"] .dettaglio-giorno-freccia{transform:rotate(180deg)}
 .dettaglio-giorno-collassabile[hidden]{display:none!important}
+
+/* ========== Fix tema scuro — variabili + pezzi rimasti chiari ========== */
+[data-tema="scuro"] .btn-dettaglio-modifica,
+[data-tema="scuro"] .btn-dettaglio-rimuovi{
+  background: var(--pannello) !important;
+}
+[data-tema="scuro"] .dashboard-assenze,
+[data-tema="scuro"] .card-assenza,
+[data-tema="scuro"] .riepilogo-turni-v45,
+[data-tema="scuro"] .prossimo-turno-widget,
+[data-tema="scuro"] .azioni-calendario-rapide,
+[data-tema="scuro"] .scheda,
+[data-tema="scuro"] .cedolino-v39-riepilogo>div,
+[data-tema="scuro"] .grado-visuale,
+[data-tema="scuro"] .anteprima-turnazione-semplice{
+  background: var(--sfondo-card);
+  color: var(--testo);
+}
+[data-tema="scuro"] .assenza-stat,
+[data-tema="scuro"] .card-assenza-compact,
+[data-tema="scuro"] .riepilogo-turni-v45-grid div,
+[data-tema="scuro"] .card-assenza-icon,
+[data-tema="scuro"] .card-assenza-status{
+  background: var(--sfondo-secondario);
+}
+[data-tema="scuro"] input,
+[data-tema="scuro"] select,
+[data-tema="scuro"] textarea{
+  background: var(--sfondo-secondario);
+  color: var(--testo);
+  border-color: var(--bordo);
+}
+[data-tema="scuro"] .prossimo-turno-quando{
+  background: var(--pannello);
+  color: var(--testo);
+}
+[data-tema="scuro"] .giorno-turno-badge{
+  background: rgba(255,255,255,.09);
+  color: var(--testo);
+}
