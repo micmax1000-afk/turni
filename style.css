@@ -1627,3 +1627,11 @@ h3{ font-family: var(--font-display); font-weight:600; }
   background: var(--badge-assenza);
   color: #4B5563;
 }
+
+
+/* IMPOSTAZIONI — tema rimosso
+   L'app usa esclusivamente il tema chiaro. Nasconde completamente
+   la sezione Tema da Impostazioni, compreso il relativo contenuto. */
+.impostazioni-tema{
+  display:none !important;
+}
